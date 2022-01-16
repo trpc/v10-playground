@@ -1,0 +1,18 @@
+{
+  "name": "playing-with-new-middleware-structure",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "start": "nodemon -e ts -w . -x ts-node ./src/index.ts"
+  },
+  "dependencies": {
+    "expect-type": "0.13.0",
+    "nodemon": "2.0.15",
+    "parcel-bundler": "^1.6.1",
+    "ts-node": "10.4.0",
+    "typescript": "4.5.4",
+    "zod": "3.11.6"
+  },
+  "keywords": []
+}
