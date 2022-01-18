@@ -12,7 +12,7 @@ type TestContext = {
 };
 
 // boilerplate for each app, in like a utils
-const pipe = pipedResolver<TestContext>();
+const resolver = pipedResolver<TestContext>();
 const swapContext = contextSwapperMiddleware<TestContext>();
 const createRouter = createRouterWithContext<TestContext>();
 
@@ -46,7 +46,7 @@ const router = createRouter({
         ]
       };
     },
-    greeting: pipe(
+    greeting: resolver(
       // adds zod input validation
       zodMiddleware(
         z.object({
