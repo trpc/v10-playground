@@ -1,4 +1,4 @@
-import { ProcedureCall, ProcedureResult } from './core';
+import { ProcedureCall, ProcedureResult } from './';
 
 type ProcedureRecord<TContext> = Record<
   string,

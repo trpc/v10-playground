@@ -1,7 +1,12 @@
 import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
-import { createRouterWithContext, inferProcedure, pipedResolver } from './trpc';
-import { contextSwapperMiddleware, zodMiddleware } from './trpc';
+import {
+  contextSwapperMiddleware,
+  createRouterWithContext,
+  inferProcedure,
+  pipedResolver,
+  zodMiddleware,
+} from './trpc/server';
 
 ////////////////////// app ////////////////////////////
 // context
