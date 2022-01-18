@@ -1,3 +1,5 @@
+> CodeSandobx link: https://codesandbox.io/s/zen-sky-y9ijy?file=/src/index.ts
+
 # trpc-procedure-play
 
 Early draft of how a future tRPC-version could look like.
