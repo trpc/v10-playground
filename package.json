@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "start": "nodemon -e ts -w . -x ts-node ./src/index.ts"
+    "dev:server": "nodemon -e ts -w . -x ts-node ./src/server.ts",
+    "dev:client": "nodemon -e ts -w . -x 'ts-node ./src/client.ts'",
+    "dev": "run-p dev:* --print-label"
   },
   "prettier": {
     "printWidth": 80,
@@ -15,9 +17,11 @@
   "dependencies": {
     "expect-type": "0.13.0",
     "nodemon": "2.0.15",
+    "npm-run-all": "^4.1.5",
     "parcel-bundler": "^1.6.1",
     "ts-node": "10.4.0",
     "typescript": "4.5.4",
+    "wait-port": "^0.2.9",
     "zod": "3.11.6"
   },
   "keywords": []

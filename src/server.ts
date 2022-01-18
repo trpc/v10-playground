@@ -39,7 +39,7 @@ const isAuthed = swapContext((params) => {
 });
 
 /////////// app root router //////////
-const router = createRouter({
+export const appRouter = createRouter({
   queries: {
     'post.all': ({ ctx }) => {
       return {
@@ -56,7 +56,11 @@ const router = createRouter({
       zodMiddleware(
         z.object({
           hello: z.string(),
-          lengthOf: z.string().transform((s) => s.length),
+          lengthOf: z
+            .string()
+            .transform((s) => s.length)
+            .optional()
+            .default(''),
         }),
       ),
       // swaps context to make sure the user is authenticated
@@ -107,7 +111,7 @@ const router = createRouter({
 
 async function main() {
   // if you hover result we can see that we can infer both the result and every possible expected error
-  const result = await router.queries.greeting({ ctx: {} });
+  const result = await appRouter.queries.greeting({ ctx: {} });
   if ('error' in result && result.error) {
     console.log(result.error);
     if ('zod' in result.error) {
@@ -119,7 +123,7 @@ async function main() {
   }
 
   // some type testing below
-  type MyProcedure = inferProcedure<typeof router['queries']['greeting']>;
+  type MyProcedure = inferProcedure<typeof appRouter['queries']['greeting']>;
 
   expectTypeOf<MyProcedure['ctx']>().toMatchTypeOf<{
     user: { id: string };
@@ -133,7 +137,7 @@ async function main() {
 
   expectTypeOf<MyProcedure['_input_in']>().toMatchTypeOf<{
     hello: string;
-    lengthOf: string;
+    lengthOf?: string;
   }>();
   expectTypeOf<MyProcedure['_input_out']>().toMatchTypeOf<{
     hello: string;

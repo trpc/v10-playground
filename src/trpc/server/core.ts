@@ -56,16 +56,16 @@ interface MiddlewareResultBase<TParams> {
   readonly marker: typeof middlewareMarker;
   TParams: TParams;
 }
-interface MiddlewareOKResult<TParams>
+export interface MiddlewareOKResult<TParams>
   extends MiddlewareResultBase<TParams>,
     ProcedureResultSuccess {}
-interface MiddlewareErrorResult<TParams>
+export interface MiddlewareErrorResult<TParams>
   extends MiddlewareResultBase<TParams>,
     ProcedureResultError {}
-type MiddlewareResult<TParams> =
+export type MiddlewareResult<TParams> =
   | MiddlewareOKResult<TParams>
   | MiddlewareErrorResult<TParams>;
-type MiddlewareFunctionParams<TInputParams> = TInputParams & {
+export type MiddlewareFunctionParams<TInputParams> = TInputParams & {
   next: {
     (): Promise<MiddlewareResult<TInputParams>>;
     <T>(params: T): Promise<MiddlewareResult<T>>;
