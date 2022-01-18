@@ -86,9 +86,9 @@ export interface Params<TContext> {
   rawInput?: unknown;
 }
 type ExcludeMiddlewareResult<T> = T extends MiddlewareResult<any> ? never : T;
-export type ProcedureCall<TBaseParams, ResolverResult> = (
+export type ProcedureCall<TBaseParams, TResult extends ProcedureResult> = (
   params: TBaseParams
-) => MaybePromise<ResolverResult>;
+) => MaybePromise<TResult>;
 type ProcedureMeta<TParams> = {
   /**
    * @internal

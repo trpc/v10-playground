@@ -17,8 +17,3 @@ export function createRouterWithContext<TContext>() {
     return procedures;
   };
 }
-
-export type ProcedureInputParserZodEsque<TInput, TParsedInput> = {
-  _input: TInput;
-  _output: TParsedInput;
-};
