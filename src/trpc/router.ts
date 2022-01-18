@@ -1,4 +1,4 @@
-import { ProcedureCall, ProcedureResult } from "./core";
+import { ProcedureCall, ProcedureResult } from './core';
 
 type ProcedureRecord<TContext> = Record<
   string,
@@ -12,7 +12,7 @@ export interface ProceduresByType<TContext> {
 
 export function createRouterWithContext<TContext>() {
   return function createRouter<TProcedures extends ProceduresByType<TContext>>(
-    procedures: TProcedures
+    procedures: TProcedures,
   ): TProcedures {
     return procedures;
   };
