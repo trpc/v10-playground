@@ -21,4 +21,4 @@ Head in to `src/server.ts` / `src/client.ts`, try adding/removing/changing queri
 
 ## Current issues
 
-- Unable to infer the correct error shape from `isAuthed()` from the context swap middleware
+- #1 Unable to infer the correct error shape from `isAuthed()` from the context swap middleware
