@@ -1,4 +1,4 @@
-> CodeSandbox link: https://codesandbox.io/s/github/katt/trpc-procedure-play?file=/src/index.ts
+> CodeSandbox link: https://codesandbox.io/s/github/katt/trpc-procedure-play?file=/src/client.ts
 >
 > Repo: https://github.com/KATT/trpc-procedure-play
 
