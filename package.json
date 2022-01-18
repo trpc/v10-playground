@@ -6,6 +6,12 @@
   "scripts": {
     "start": "nodemon -e ts -w . -x ts-node ./src/index.ts"
   },
+  "prettier": {
+    "printWidth": 80,
+    "trailingComma": "all",
+    "endOfLine": "auto",
+    "singleQuote": true
+  },
   "dependencies": {
     "expect-type": "0.13.0",
     "nodemon": "2.0.15",

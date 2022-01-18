@@ -1,4 +1,4 @@
-> CodeSandbox link: https://codesandbox.io/s/zen-sky-y9ijy?file=/src/index.ts
+> CodeSandbox link: https://githubbox.com/KATT/trpc-procedure-play
 >
 > Repo: https://github.com/KATT/trpc-procedure-play
 
