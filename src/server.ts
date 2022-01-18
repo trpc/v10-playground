@@ -41,7 +41,7 @@ const isAuthed = swapContext((params) => {
 /////////// app root router //////////
 export const appRouter = createRouter({
   queries: {
-    'post.all': ({ ctx }) => {
+    'post.all': (params) => {
       return {
         data: [
           {
@@ -111,8 +111,10 @@ async function main() {
       // zod error inferred - useful for forms w/o libs
       console.log(result.error.zod.hello?._errors);
     }
-  } else {
+  } else if ('data' in result) {
     console.log(result.data);
+  } else {
+    throw new Error("Procedure didn't return data");
   }
 
   // some type testing below
