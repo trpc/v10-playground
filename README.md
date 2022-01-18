@@ -10,10 +10,14 @@ Head in to `src/server.ts` / `src/client.ts`, try adding/removing/changing queri
 
 ## Goals & features
 
+### DX
+
 - More ergonomic API for creating procedures and building out your backend
-- Better scaling than current structure - the TypeScript server starts choking a bit when you get close to 100 procedures in your backend
+- CMD+Click from a react-query or raw client straight into the backend
 - Infer expected errors as well as data - unsure if this is useful yet or if it'll make it, but pretty sure it'll be nice to have.
 - Foundation for creating a watcher-based structure - as you see, that `createRouter()` could easily be automatically generated from a file/folder structure.
+- Better scaling than current structure - the TypeScript server starts choking a bit when you get close to 100 procedures in your backend
+
 
 ## Current issues
 
