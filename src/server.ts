@@ -65,24 +65,24 @@ export const appRouter = createRouter({
       ),
       // swaps context to make sure the user is authenticated
       // FIXME:
-      // isAuthed(),
+      isAuthed(),
       // manual version of the `isAuthed()` above
-      async (params) => {
-        if (!params.ctx.user) {
-          return {
-            error: {
-              code: 'UNAUTHORIZED',
-            },
-          };
-        }
-        return params.next({
-          ...params,
-          ctx: {
-            ...params.ctx,
-            user: params.ctx.user,
-          },
-        });
-      },
+      // async (params) => {
+      //   if (!params.ctx.user) {
+      //     return {
+      //       error: {
+      //         code: 'UNAUTHORIZED',
+      //       },
+      //     };
+      //   }
+      //   return params.next({
+      //     ...params,
+      //     ctx: {
+      //       ...params.ctx,
+      //       user: params.ctx.user,
+      //     },
+      //   });
+      // },
       (params) => {
         type TContext = typeof params.ctx;
         type TInput = typeof params.input;
@@ -106,6 +106,7 @@ async function main() {
   // if you hover result we can see that we can infer both the result and every possible expected error
   const result = await appRouter.queries.greeting({ ctx: {} });
   if ('error' in result && result.error) {
+    // FIXME: `result.error` contains `ResultErrorData` where it should be `{ error: { code: "UNAUTHORIZED "}}`
     console.log(result.error);
     if ('zod' in result.error) {
       // zod error inferred - useful for forms w/o libs
