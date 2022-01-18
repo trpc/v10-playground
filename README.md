@@ -6,7 +6,7 @@
 
 Early draft of how a future tRPC-version could look like.
 
-Head in to `src/index.ts`, try adding/removing/changing queries and mutations.
+Head in to `src/server.ts` / `src/client.ts`, try adding/removing/changing queries and mutations.
 
 ## Goals & features
 

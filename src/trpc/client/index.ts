@@ -28,7 +28,12 @@ export function createClient<TRouter extends ProceduresByType<any>>() {
 
   function query<
     TProcedure extends ValueOf<TRouter['queries']> & ProcedureCall<any, any>,
-  >(path: TProcedure, ...args: inferProcedureArgs<TProcedure>) {}
+  >(
+    path: TProcedure,
+    ...args: inferProcedureArgs<TProcedure>
+  ): Promise<inferProcedure<TProcedure>['result']> {
+    throw new Error('Unimplemented');
+  }
 
   return {
     queries: routerProxy.queries as TRouter['queries'],

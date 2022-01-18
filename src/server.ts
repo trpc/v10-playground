@@ -92,13 +92,6 @@ export const appRouter = createRouter({
           lengthOf: number;
         }>();
 
-        if (Math.random() > 0.5) {
-          return {
-            error: {
-              code: 'INTERNAL_SERVER_ERROR' as const,
-            },
-          };
-        }
         return {
           data: {
             greeting: 'hello ' + params.ctx.user.id ?? params.input.hello,
