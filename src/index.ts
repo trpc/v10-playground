@@ -1,20 +1,20 @@
 import { expectTypeOf } from "expect-type";
 import { z } from "zod";
-import { inferProcedure, pipedResolver } from "./trpc";
+import { createRouterWithContext, inferProcedure, pipedResolver } from "./trpc";
 import { contextSwapperMiddleware, zodMiddleware } from "./trpc";
 
 ////////////////////// app ////////////////////////////
-
-// boilerplate for each app, in like a utils
-const pipe = pipedResolver<TestContext>();
-const swapContext = contextSwapperMiddleware<TestContext>();
-
 // context
 type TestContext = {
   user?: {
     id: string;
   };
 };
+
+// boilerplate for each app, in like a utils
+const pipe = pipedResolver<TestContext>();
+const swapContext = contextSwapperMiddleware<TestContext>();
+const createRouter = createRouterWithContext<TestContext>();
 
 ////////// app middlewares ////////
 const isAuthed = swapContext((params) => {
@@ -33,64 +33,76 @@ const isAuthed = swapContext((params) => {
   };
 });
 
-/////////// app resolvers //////////
-
-// creating a resolver with a set of reusable middlewares
-const myProcedure = pipe(
-  // adds zod input validation
-  zodMiddleware(
-    z.object({
-      hello: z.string(),
-      lengthOf: z.string().transform((s) => s.length)
-    })
-  ),
-  // swaps context to make sure the user is authenticated
-  // FIXME:
-  isAuthed(),
-  // manual version of the `isAuthed()` above
-  // async (params) => {
-  //   if (!params.ctx.user) {
-  //     return {
-  //       error: {
-  //         code: 'UNAUTHORIZED',
-  //       },
-  //     };
-  //   }
-  //   return params.next({
-  //     ...params,
-  //     ctx: {
-  //       ...params.ctx,
-  //       user: params.ctx.user,
-  //     },
-  //   });
-  // },
-  (params) => {
-    type TContext = typeof params.ctx;
-    type TInput = typeof params.input;
-    expectTypeOf<TContext>().toMatchTypeOf<{ user: { id: string } }>();
-    expectTypeOf<TInput>().toMatchTypeOf<{
-      hello: string;
-      lengthOf: number;
-    }>();
-
-    if (Math.random() > 0.5) {
+/////////// app root router //////////
+const router = createRouter({
+  queries: {
+    "post.all": ({ ctx }) => {
       return {
-        error: {
-          code: "INTERNAL_SERVER_ERROR" as const
-        }
+        data: [
+          {
+            id: 1,
+            title: "hello tRPC"
+          }
+        ]
       };
-    }
-    return {
-      data: {
-        greeting: "hello " + params.ctx.user.id ?? params.input.hello
+    },
+    greeting: pipe(
+      // adds zod input validation
+      zodMiddleware(
+        z.object({
+          hello: z.string(),
+          lengthOf: z.string().transform((s) => s.length)
+        })
+      ),
+      // swaps context to make sure the user is authenticated
+      // FIXME:
+      isAuthed(),
+      // manual version of the `isAuthed()` above
+      // async (params) => {
+      //   if (!params.ctx.user) {
+      //     return {
+      //       error: {
+      //         code: 'UNAUTHORIZED',
+      //       },
+      //     };
+      //   }
+      //   return params.next({
+      //     ...params,
+      //     ctx: {
+      //       ...params.ctx,
+      //       user: params.ctx.user,
+      //     },
+      //   });
+      // },
+      (params) => {
+        type TContext = typeof params.ctx;
+        type TInput = typeof params.input;
+        expectTypeOf<TContext>().toMatchTypeOf<{ user: { id: string } }>();
+        expectTypeOf<TInput>().toMatchTypeOf<{
+          hello: string;
+          lengthOf: number;
+        }>();
+
+        if (Math.random() > 0.5) {
+          return {
+            error: {
+              code: "INTERNAL_SERVER_ERROR" as const
+            }
+          };
+        }
+        return {
+          data: {
+            greeting: "hello " + params.ctx.user.id ?? params.input.hello
+          }
+        };
       }
-    };
+    )
   }
-);
+});
 
 async function main() {
   // if you hover result we can see that we can infer both the result and every possible expected error
-  const result = await myProcedure({ ctx: {} });
+  const result = await router.queries.greeting({ ctx: {} });
   if ("error" in result && result.error) {
     console.log(result.error);
     if ("zod" in result.error) {
@@ -102,7 +114,7 @@ async function main() {
   }
 
   // some type testing below
-  type MyProcedure = inferProcedure<typeof myProcedure>;
+  type MyProcedure = inferProcedure<typeof router["queries"]["greeting"]>;
 
   expectTypeOf<MyProcedure["ctx"]>().toMatchTypeOf<{
     user: { id: string };

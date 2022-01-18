@@ -36,17 +36,17 @@ export const TRPC_ERROR_CODES_BY_KEY = {
 } as const;
 type ErrorCode = keyof typeof TRPC_ERROR_CODES_BY_KEY;
 //////// response shapes //////////
-interface ProcedureResultSuccess {
+export interface ProcedureResultSuccess {
   data?: unknown;
 }
-interface ResultErrorData {
+export interface ResultErrorData {
   code: ErrorCode;
   cause?: Error;
 }
 export interface ProcedureResultError {
   error: ResultErrorData;
 }
-type ProcedureResult = ProcedureResultSuccess | ProcedureResultError;
+export type ProcedureResult = ProcedureResultSuccess | ProcedureResultError;
 ///////// middleware implementation ///////////
 interface MiddlewareResultBase<TParams> {
   /**
