@@ -1,11 +1,6 @@
 import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
-import {
-  createRouterWithContext,
-  createUseNewContext,
-  pipedResolver,
-  useZod,
-} from './trpc/server';
+import { initTRPC } from './trpc/server';
 
 ////////////////////// app ////////////////////////////
 type Context = {
@@ -15,12 +10,10 @@ type Context = {
 };
 
 // boilerplate for each app, in like a utils
-const resolver = pipedResolver<Context>();
-const createRouter = createRouterWithContext<Context>();
-const useNewContextFactory = createUseNewContext<Context>();
+const trpc = initTRPC<Context>();
 
 ////////// app middlewares ////////
-const useIsAuthed = useNewContextFactory((params) => {
+const isAuthed = trpc.newContext((params) => {
   if (!params.ctx.user) {
     return {
       error: {
@@ -37,7 +30,7 @@ const useIsAuthed = useNewContextFactory((params) => {
 });
 
 /////////// app root router //////////
-export const appRouter = createRouter({
+export const appRouter = trpc.router({
   queries: {
     'post.all': (params) => {
       expectTypeOf<typeof params>().toMatchTypeOf<{
@@ -52,9 +45,9 @@ export const appRouter = createRouter({
         ],
       };
     },
-    greeting: resolver(
+    greeting: trpc.resolver(
       // adds zod input validation
-      useZod(
+      trpc.zod(
         z.object({
           hello: z.string(),
           lengthOf: z
@@ -80,9 +73,9 @@ export const appRouter = createRouter({
         };
       },
     ),
-    whoami: resolver(
+    whoami: trpc.resolver(
       //
-      useIsAuthed(),
+      isAuthed(),
       ({ ctx }) => {
         return { data: `your id is ${ctx.user.id}` };
       },
