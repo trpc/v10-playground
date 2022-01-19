@@ -14,7 +14,8 @@ async function main() {
   }
 
   {
-    // also works with string based path if you don't like proxy objects
+    // we can also use string based path if we prefer that
+    // (but then you can't click your way to the backend)
     const greeting = await client.query('greeting', { hello: 'string' });
     const posts = await client.query('post.all');
   }
