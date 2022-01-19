@@ -2,9 +2,9 @@
 >
 > Repo: https://github.com/KATT/trpc-procedure-play
 
-# trpc-procedure-play
+# [tRPC](https://trpc.io) V10 play
 
-Early draft of how a future tRPC-version could look like.
+Early draft of how a future [tRPC](https://trpc.io)-version could look like.
 
 ## Play with it!
 
