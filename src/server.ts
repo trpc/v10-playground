@@ -64,25 +64,7 @@ export const appRouter = createRouter({
         }),
       ),
       // swaps context to make sure the user is authenticated
-      // FIXME:
       isAuthed(),
-      // manual version of the `isAuthed()` above (works)
-      // async (params) => {
-      //   if (!params.ctx.user) {
-      //     return {
-      //       error: {
-      //         code: 'UNAUTHORIZED',
-      //       },
-      //     };
-      //   }
-      //   return params.next({
-      //     ...params,
-      //     ctx: {
-      //       ...params.ctx,
-      //       user: params.ctx.user,
-      //     },
-      //   });
-      // },
       (params) => {
         type TContext = typeof params.ctx;
         type TInput = typeof params.input;
@@ -99,56 +81,87 @@ export const appRouter = createRouter({
         };
       },
     ),
+    whoami: resolver(
+      // FIXME this doesn't work as epxected:
+      isAuthed(),
+      // // below is a manual version of the `isAuthed()` above that works
+      // // try commenting out line 87 and uncommenting the below
+      // async (params) => {
+      //   if (!params.ctx.user) {
+      //     return {
+      //       error: {
+      //         code: 'UNAUTHORIZED',
+      //       },
+      //     };
+      //   }
+      //   return params.next({
+      //     ...params,
+      //     ctx: {
+      //       ...params.ctx,
+      //       user: params.ctx.user,
+      //     },
+      //   });
+      // },
+      ({ ctx }) => {
+        return { data: `your id is ${ctx.user.id}` };
+      },
+    ),
   },
 });
 
 async function main() {
-  // if you hover result we can see that we can infer both the result and every possible expected error
-  const result = await appRouter.queries.greeting({ ctx: {} });
-  if ('error' in result && result.error) {
-    // FIXME: `result.error` contains `ResultErrorData` where it should be `{ error: { code: "UNAUTHORIZED "}}`
-    expectTypeOf<typeof result['error']>().toMatchTypeOf<
-      | {
-          code: 'UNAUTHORIZED';
-        }
-      | {
-          code: 'BAD_REQUEST';
-          zod: z.ZodFormattedError<{
-            lengthOf?: string | undefined;
-            hello: string;
-          }>;
-        }
-    >();
-    if ('zod' in result.error) {
-      // zod error inferred - useful for forms w/o libs
-      console.log(result.error.zod.hello?._errors);
+  {
+    const result = await appRouter.queries['whoami']({ ctx: {} });
+    if ('error' in result) {
+      expectTypeOf<typeof result['error']>().toMatchTypeOf<
+        | {
+            code: 'UNAUTHORIZED';
+          }
+        | {
+            code: 'BAD_REQUEST';
+            zod: z.ZodFormattedError<{
+              lengthOf?: string | undefined;
+              hello: string;
+            }>;
+          }
+      >();
     }
-  } else if ('data' in result) {
-    console.log(result.data);
-  } else {
-    throw new Error("Procedure didn't return data");
   }
+  {
+    // if you hover result we can see that we can infer both the result and every possible expected error
+    const result = await appRouter.queries.greeting({ ctx: {} });
+    if ('error' in result && result.error) {
+      if ('zod' in result.error) {
+        // zod error inferred - useful for forms w/o libs
+        console.log(result.error.zod.hello?._errors);
+      }
+    } else if ('data' in result) {
+      console.log(result.data);
+    } else {
+      throw new Error("Procedure didn't return data");
+    }
 
-  // some type testing below
-  type MyProcedure = inferProcedure<typeof appRouter['queries']['greeting']>;
+    // some type testing below
+    type MyProcedure = inferProcedure<typeof appRouter['queries']['greeting']>;
 
-  expectTypeOf<MyProcedure['ctx']>().toMatchTypeOf<{
-    user: { id: string };
-  }>();
+    expectTypeOf<MyProcedure['ctx']>().toMatchTypeOf<{
+      user: { id: string };
+    }>();
 
-  expectTypeOf<MyProcedure['data']>().toMatchTypeOf<{
-    data: {
-      greeting: string;
-    };
-  }>();
+    expectTypeOf<MyProcedure['data']>().toMatchTypeOf<{
+      data: {
+        greeting: string;
+      };
+    }>();
 
-  expectTypeOf<MyProcedure['_input_in']>().toMatchTypeOf<{
-    hello: string;
-    lengthOf?: string;
-  }>();
-  expectTypeOf<MyProcedure['_input_out']>().toMatchTypeOf<{
-    hello: string;
-    lengthOf: number;
-  }>();
+    expectTypeOf<MyProcedure['_input_in']>().toMatchTypeOf<{
+      hello: string;
+      lengthOf?: string;
+    }>();
+    expectTypeOf<MyProcedure['_input_out']>().toMatchTypeOf<{
+      hello: string;
+      lengthOf: number;
+    }>();
+  }
 }
 main();
