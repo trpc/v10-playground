@@ -8,16 +8,16 @@ import {
 } from './trpc/server';
 
 ////////////////////// app ////////////////////////////
-type TestContext = {
+type Context = {
   user?: {
     id: string;
   };
 };
 
 // boilerplate for each app, in like a utils
-const resolver = pipedResolver<TestContext>();
-const createRouter = createRouterWithContext<TestContext>();
-const useNewContextFactory = createUseNewContext<TestContext>();
+const resolver = pipedResolver<Context>();
+const createRouter = createRouterWithContext<Context>();
+const useNewContextFactory = createUseNewContext<Context>();
 
 ////////// app middlewares ////////
 const useIsAuthed = useNewContextFactory((params) => {
@@ -41,7 +41,7 @@ export const appRouter = createRouter({
   queries: {
     'post.all': (params) => {
       expectTypeOf<typeof params>().toMatchTypeOf<{
-        ctx: TestContext;
+        ctx: Context;
       }>();
       return {
         data: [
