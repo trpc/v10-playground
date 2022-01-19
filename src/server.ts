@@ -88,6 +88,7 @@ export const appRouter = createRouter({
   },
 });
 
+///////////// this below are just tests that the type checking is doing it's thing right ////////////
 async function main() {
   {
     // query 'whoami'
