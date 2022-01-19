@@ -1,11 +1,11 @@
 import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import {
-  contextSwapperMiddleware as createContextSwapperMiddleware,
+  createUseNewContext,
   createRouterWithContext,
   inferProcedure,
   pipedResolver,
-  zodMiddleware,
+  useZod,
 } from './trpc/server';
 
 ////////////////////// app ////////////////////////////
@@ -18,11 +18,10 @@ type TestContext = {
 
 // boilerplate for each app, in like a utils
 const resolver = pipedResolver<TestContext>();
-const swapContextMiddleware = createContextSwapperMiddleware<TestContext>();
 const createRouter = createRouterWithContext<TestContext>();
-
+const useNewContextFactory = createUseNewContext<TestContext>();
 ////////// app middlewares ////////
-const isAuthed = swapContextMiddleware((params) => {
+const useIsAuthed = useNewContextFactory((params) => {
   if (!params.ctx.user) {
     return {
       error: {
@@ -53,7 +52,7 @@ export const appRouter = createRouter({
     },
     greeting: resolver(
       // adds zod input validation
-      zodMiddleware(
+      useZod(
         z.object({
           hello: z.string(),
           lengthOf: z
@@ -79,9 +78,13 @@ export const appRouter = createRouter({
         };
       },
     ),
-    whoami: resolver(isAuthed(), ({ ctx }) => {
-      return { data: `your id is ${ctx.user.id}` };
-    }),
+    whoami: resolver(
+      //
+      useIsAuthed(),
+      ({ ctx }) => {
+        return { data: `your id is ${ctx.user.id}` };
+      },
+    ),
   },
 });
 

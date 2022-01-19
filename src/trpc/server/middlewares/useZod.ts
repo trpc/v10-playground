@@ -7,7 +7,7 @@ export type IsProcedureResultErrorLike<T> = T extends ProcedureResultError
 /***
  * Utility for creating a zod middleware
  */
-export function zodMiddleware<TInputParams, TSchema extends z.ZodTypeAny>(
+export function useZod<TInputParams, TSchema extends z.ZodTypeAny>(
   schema: TSchema,
 ): MiddlewareFunction<
   TInputParams,

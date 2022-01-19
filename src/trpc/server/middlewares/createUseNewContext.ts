@@ -4,20 +4,25 @@ import {
   Params,
   ProcedureResultError,
 } from '..';
-import { IsProcedureResultErrorLike } from './zodMiddleware';
+import { IsProcedureResultErrorLike } from './useZod';
 
 /**
  * Utility for creating a middleware that swaps the context around
  */
-export function contextSwapperMiddleware<TInputContext>() {
-  return function factory<TNewContext, TError extends ProcedureResultError>(
+export function createUseNewContext<TInputContext>() {
+  return function useNewContextFactory<
+    TNewContext,
+    TError extends ProcedureResultError,
+  >(
     newContext: (
       params: Params<TInputContext>,
     ) => MaybePromise<
       { ctx: TNewContext } | IsProcedureResultErrorLike<TError>
     >,
   ) {
-    return function middleware<TInputParams extends {}>(): MiddlewareFunction<
+    return function useContextSwapper<
+      TInputParams extends {},
+    >(): MiddlewareFunction<
       TInputParams,
       Omit<TInputParams, 'ctx'> & { ctx: NonNullable<TNewContext> },
       TError
