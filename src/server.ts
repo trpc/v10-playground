@@ -33,7 +33,7 @@ const isAuthed = trpc.newContext((params) => {
 export const appRouter = trpc.router({
   queries: {
     'post.all': (params) => {
-      expectTypeOf<typeof params>().toMatchTypeOf<{
+      expectTypeOf(params).toMatchTypeOf<{
         ctx: Context;
       }>();
       return {
@@ -58,10 +58,8 @@ export const appRouter = trpc.router({
         }),
       ),
       (params) => {
-        type TContext = typeof params.ctx;
-        type TInput = typeof params.input;
-        expectTypeOf<TContext>().toMatchTypeOf<{ user?: { id: string } }>();
-        expectTypeOf<TInput>().toMatchTypeOf<{
+        expectTypeOf(params.ctx).toMatchTypeOf<{ user?: { id: string } }>();
+        expectTypeOf(params.input).toMatchTypeOf<{
           hello: string;
           lengthOf: number;
         }>();
