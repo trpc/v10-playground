@@ -16,7 +16,6 @@ export interface ProcedureResultSuccess {
 }
 export interface ResultErrorData {
   code: TRPC_ERROR_CODE_KEY;
-  cause?: Error;
 }
 export interface ProcedureResultError {
   error: ResultErrorData;
@@ -53,47 +52,44 @@ export type MiddlewareFunction<
 > = (
   params: MiddlewareFunctionParams<TInputParams>,
 ) => Promise<MiddlewareResult<TNextParams> | TResult> | TResult;
-type Resolver<TParams, TResult extends ProcedureResult> = (
-  params: TParams,
-) => MaybePromise<TResult>;
+
 export interface Params<TContext> {
   ctx: TContext;
   rawInput?: unknown;
 }
 type ExcludeMiddlewareResult<T> = T extends MiddlewareResult<any> ? never : T;
-export type ProcedureCall<TBaseParams, TResult extends ProcedureResult> = (
+export type Procedure<TBaseParams, TResult extends ProcedureResult> = (
   params: TBaseParams,
 ) => MaybePromise<TResult>;
-type ProcedureMeta<TParams> = {
+/**
+ * @internal
+ */
+export type ProcedureMeta<TParams> = {
   /**
    * @internal
    */
   _params: TParams;
 };
-export type ProcedureCallWithMeta<TBaseParams, TParams, TResult> =
-  ProcedureCall<TBaseParams, TResult> & ProcedureMeta<TParams>;
-// interface Procedure<TBaseParams, ResolverParams, ResolverResult> {
-//   /**
-//    * @internal
-//    * @deprecated
-//    */
-//   _params: ResolverParams;
-//   call(params: TBaseParams): MaybePromise<ResolverResult>;
-// }
+export type ProcedureWithMeta<TBaseParams, TParams, TResult> = Procedure<
+  TBaseParams,
+  TResult
+> &
+  ProcedureMeta<TParams>;
+
 export function pipedResolver<TContext>() {
   type TBaseParams = Params<TContext>;
 
   function middlewares<TResult extends ProcedureResult>(
-    resolver: Resolver<TBaseParams, TResult>,
-  ): ProcedureCallWithMeta<TBaseParams, TBaseParams, TResult>;
+    resolver: Procedure<TBaseParams, TResult>,
+  ): ProcedureWithMeta<TBaseParams, TBaseParams, TResult>;
   function middlewares<
     TResult extends ProcedureResult,
     MW1Params extends TBaseParams = TBaseParams,
     MW1Result extends ProcedureResult = never,
   >(
     middleware1: MiddlewareFunction<TBaseParams, MW1Params, MW1Result>,
-    resolver: Resolver<MW1Params, TResult>,
-  ): ProcedureCallWithMeta<
+    resolver: Procedure<MW1Params, TResult>,
+  ): ProcedureWithMeta<
     TBaseParams,
     MW1Params,
     ExcludeMiddlewareResult<TResult | MW1Result>
@@ -107,8 +103,8 @@ export function pipedResolver<TContext>() {
   >(
     middleware1: MiddlewareFunction<TBaseParams, MW1Params, MW1Result>,
     middleware2: MiddlewareFunction<MW1Params, MW2Params, MW2Result>,
-    resolver: Resolver<MW2Params, TResult>,
-  ): ProcedureCallWithMeta<
+    resolver: Procedure<MW2Params, TResult>,
+  ): ProcedureWithMeta<
     TBaseParams,
     MW2Params,
     ExcludeMiddlewareResult<TResult | MW1Result | MW2Result>

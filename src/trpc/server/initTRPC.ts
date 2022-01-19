@@ -22,6 +22,6 @@ export function initTRPC<TContext>() {
     /**
      * Zod middlware
      */
-    zod: zod,
+    zod,
   };
 }

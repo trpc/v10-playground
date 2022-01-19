@@ -1,8 +1,8 @@
-import { ProcedureCall, ProcedureResult } from './';
+import { Procedure, ProcedureResult } from './';
 
 type ProcedureRecord<TContext> = Record<
   string,
-  ProcedureCall<{ ctx: TContext }, ProcedureResult>
+  Procedure<{ ctx: TContext }, ProcedureResult>
 >;
 
 export interface ProceduresByType<TContext> {
