@@ -1,12 +1,9 @@
 import { z } from 'zod';
-import {
-  InputSchema,
-  MaybePromise,
-  MiddlewareFunction,
-  Params,
-  ProcedureResultError,
-} from './';
+import { InputSchema, MiddlewareFunction, ProcedureResultError } from '..';
 
+export type IsProcedureResultErrorLike<T> = T extends ProcedureResultError
+  ? T
+  : never;
 /***
  * Utility for creating a zod middleware
  */
@@ -39,35 +36,6 @@ export function zodMiddleware<TInputParams, TSchema extends z.ZodTypeAny>(
         code: 'BAD_REQUEST',
         zod,
       },
-    };
-  };
-}
-/**
- * Utility for creating a middleware that swaps the context around
- * FIXME: this does not correctly infer the `TError` from the callback
- */
-export function contextSwapperMiddleware<TInputContext>() {
-  return function factory<TNewContext, TError extends ProcedureResultError>(
-    newContext: (
-      params: Params<TInputContext>,
-    ) => MaybePromise<{ ctx: TNewContext } | TError>,
-  ) {
-    return function middleware<TInputParams extends {}>(): MiddlewareFunction<
-      TInputParams,
-      Omit<TInputParams, 'ctx'> & { ctx: NonNullable<TNewContext> },
-      TError
-    > {
-      return async (params) => {
-        const result = await newContext(params as any);
-
-        if ('ctx' in result) {
-          return params.next({
-            ...params,
-            ctx: result.ctx!,
-          });
-        }
-        return result;
-      };
     };
   };
 }

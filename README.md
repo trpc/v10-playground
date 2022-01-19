@@ -20,7 +20,3 @@ Early draft of how a future [tRPC](https://trpc.io)-version could look like.
 - **Enabling having a watchers**-based structure - as you see, that `createRouter()` could easily be automatically generated from a file/folder structure.
 - **Better scaling** than current structure - the TypeScript server starts choking a bit when you get close to 100 procedures in your backend
 
-
-## Current issues
-
-- Unable to infer the correct error shape from `isAuthed()` from the context swap middleware - [#1](https://github.com/KATT/trpc-procedure-play/issues/1)

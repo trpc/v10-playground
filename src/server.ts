@@ -1,7 +1,7 @@
 import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import {
-  contextSwapperMiddleware,
+  contextSwapperMiddleware as createContextSwapperMiddleware,
   createRouterWithContext,
   inferProcedure,
   pipedResolver,
@@ -18,11 +18,11 @@ type TestContext = {
 
 // boilerplate for each app, in like a utils
 const resolver = pipedResolver<TestContext>();
-const swapContext = contextSwapperMiddleware<TestContext>();
+const swapContextMiddleware = createContextSwapperMiddleware<TestContext>();
 const createRouter = createRouterWithContext<TestContext>();
 
 ////////// app middlewares ////////
-const isAuthed = swapContext((params) => {
+const isAuthed = swapContextMiddleware((params) => {
   if (!params.ctx.user) {
     return {
       error: {
@@ -63,30 +63,10 @@ export const appRouter = createRouter({
             .default(''),
         }),
       ),
-      // swaps context to make sure the user is authenticated
-      // FIXME:
-      // isAuthed(),
-      // manual version of the `isAuthed()` above
-      async (params) => {
-        if (!params.ctx.user) {
-          return {
-            error: {
-              code: 'UNAUTHORIZED',
-            },
-          };
-        }
-        return params.next({
-          ...params,
-          ctx: {
-            ...params.ctx,
-            user: params.ctx.user,
-          },
-        });
-      },
       (params) => {
         type TContext = typeof params.ctx;
         type TInput = typeof params.input;
-        expectTypeOf<TContext>().toMatchTypeOf<{ user: { id: string } }>();
+        expectTypeOf<TContext>().toMatchTypeOf<{ user?: { id: string } }>();
         expectTypeOf<TInput>().toMatchTypeOf<{
           hello: string;
           lengthOf: number;
@@ -94,49 +74,71 @@ export const appRouter = createRouter({
 
         return {
           data: {
-            greeting: 'hello ' + params.ctx.user.id ?? params.input.hello,
+            greeting: 'hello ' + params.ctx.user?.id ?? params.input.hello,
           },
         };
       },
     ),
+    whoami: resolver(isAuthed(), ({ ctx }) => {
+      return { data: `your id is ${ctx.user.id}` };
+    }),
   },
 });
 
 async function main() {
-  // if you hover result we can see that we can infer both the result and every possible expected error
-  const result = await appRouter.queries.greeting({ ctx: {} });
-  if ('error' in result && result.error) {
-    console.log(result.error);
-    if ('zod' in result.error) {
-      // zod error inferred - useful for forms w/o libs
-      console.log(result.error.zod.hello?._errors);
+  {
+    // query 'whoami'
+    const result = await appRouter.queries.whoami({ ctx: {} });
+    if ('error' in result) {
+      expectTypeOf<typeof result['error']>().toMatchTypeOf<
+        | {
+            code: 'UNAUTHORIZED';
+          }
+        | {
+            code: 'BAD_REQUEST';
+            zod: z.ZodFormattedError<{
+              lengthOf?: string | undefined;
+              hello: string;
+            }>;
+          }
+      >();
     }
-  } else if ('data' in result) {
-    console.log(result.data);
-  } else {
-    throw new Error("Procedure didn't return data");
   }
+  {
+    // if you hover result we can see that we can infer both the result and every possible expected error
+    const result = await appRouter.queries.greeting({ ctx: {} });
+    if ('error' in result && result.error) {
+      if ('zod' in result.error) {
+        // zod error inferred - useful for forms w/o libs
+        console.log(result.error.zod.hello?._errors);
+      }
+    } else if ('data' in result) {
+      console.log(result.data);
+    } else {
+      throw new Error("Procedure didn't return data");
+    }
 
-  // some type testing below
-  type MyProcedure = inferProcedure<typeof appRouter['queries']['greeting']>;
+    // some type testing below
+    type MyProcedure = inferProcedure<typeof appRouter['queries']['greeting']>;
 
-  expectTypeOf<MyProcedure['ctx']>().toMatchTypeOf<{
-    user: { id: string };
-  }>();
+    expectTypeOf<MyProcedure['ctx']>().toMatchTypeOf<{
+      user?: { id: string };
+    }>();
 
-  expectTypeOf<MyProcedure['data']>().toMatchTypeOf<{
-    data: {
-      greeting: string;
-    };
-  }>();
+    expectTypeOf<MyProcedure['data']>().toMatchTypeOf<{
+      data: {
+        greeting: string;
+      };
+    }>();
 
-  expectTypeOf<MyProcedure['_input_in']>().toMatchTypeOf<{
-    hello: string;
-    lengthOf?: string;
-  }>();
-  expectTypeOf<MyProcedure['_input_out']>().toMatchTypeOf<{
-    hello: string;
-    lengthOf: number;
-  }>();
+    expectTypeOf<MyProcedure['_input_in']>().toMatchTypeOf<{
+      hello: string;
+      lengthOf?: string;
+    }>();
+    expectTypeOf<MyProcedure['_input_out']>().toMatchTypeOf<{
+      hello: string;
+      lengthOf: number;
+    }>();
+  }
 }
 main();
