@@ -63,12 +63,10 @@ export const appRouter = createRouter({
             .default(''),
         }),
       ),
-      // swaps context to make sure the user is authenticated
-      isAuthed(),
       (params) => {
         type TContext = typeof params.ctx;
         type TInput = typeof params.input;
-        expectTypeOf<TContext>().toMatchTypeOf<{ user: { id: string } }>();
+        expectTypeOf<TContext>().toMatchTypeOf<{ user?: { id: string } }>();
         expectTypeOf<TInput>().toMatchTypeOf<{
           hello: string;
           lengthOf: number;
@@ -76,42 +74,21 @@ export const appRouter = createRouter({
 
         return {
           data: {
-            greeting: 'hello ' + params.ctx.user.id ?? params.input.hello,
+            greeting: 'hello ' + params.ctx.user?.id ?? params.input.hello,
           },
         };
       },
     ),
-    whoami: resolver(
-      // FIXME this doesn't work as epxected:
-      isAuthed(),
-      // // below is a manual version of the `isAuthed()` above that works
-      // // try commenting out line 87 and uncommenting the below
-      // async (params) => {
-      //   if (!params.ctx.user) {
-      //     return {
-      //       error: {
-      //         code: 'UNAUTHORIZED',
-      //       },
-      //     };
-      //   }
-      //   return params.next({
-      //     ...params,
-      //     ctx: {
-      //       ...params.ctx,
-      //       user: params.ctx.user,
-      //     },
-      //   });
-      // },
-      ({ ctx }) => {
-        return { data: `your id is ${ctx.user.id}` };
-      },
-    ),
+    whoami: resolver(isAuthed(), ({ ctx }) => {
+      return { data: `your id is ${ctx.user.id}` };
+    }),
   },
 });
 
 async function main() {
   {
-    const result = await appRouter.queries['whoami']({ ctx: {} });
+    // query 'whoami'
+    const result = await appRouter.queries.whoami({ ctx: {} });
     if ('error' in result) {
       expectTypeOf<typeof result['error']>().toMatchTypeOf<
         | {
