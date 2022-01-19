@@ -8,7 +8,6 @@ import {
 } from './trpc/server';
 
 ////////////////////// app ////////////////////////////
-// context
 type TestContext = {
   user?: {
     id: string;
@@ -19,6 +18,7 @@ type TestContext = {
 const resolver = pipedResolver<TestContext>();
 const createRouter = createRouterWithContext<TestContext>();
 const useNewContextFactory = createUseNewContext<TestContext>();
+
 ////////// app middlewares ////////
 const useIsAuthed = useNewContextFactory((params) => {
   if (!params.ctx.user) {
@@ -40,6 +40,9 @@ const useIsAuthed = useNewContextFactory((params) => {
 export const appRouter = createRouter({
   queries: {
     'post.all': (params) => {
+      expectTypeOf<typeof params>().toMatchTypeOf<{
+        ctx: TestContext;
+      }>();
       return {
         data: [
           {
