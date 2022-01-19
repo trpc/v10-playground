@@ -66,7 +66,7 @@ export const appRouter = createRouter({
       // swaps context to make sure the user is authenticated
       // FIXME:
       isAuthed(),
-      // manual version of the `isAuthed()` above
+      // manual version of the `isAuthed()` above (works)
       // async (params) => {
       //   if (!params.ctx.user) {
       //     return {
@@ -107,7 +107,18 @@ async function main() {
   const result = await appRouter.queries.greeting({ ctx: {} });
   if ('error' in result && result.error) {
     // FIXME: `result.error` contains `ResultErrorData` where it should be `{ error: { code: "UNAUTHORIZED "}}`
-    console.log(result.error);
+    expectTypeOf<typeof result['error']>().toMatchTypeOf<
+      | {
+          code: 'UNAUTHORIZED';
+        }
+      | {
+          code: 'BAD_REQUEST';
+          zod: z.ZodFormattedError<{
+            lengthOf?: string | undefined;
+            hello: string;
+          }>;
+        }
+    >();
     if ('zod' in result.error) {
       // zod error inferred - useful for forms w/o libs
       console.log(result.error.zod.hello?._errors);
