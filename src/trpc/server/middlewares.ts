@@ -7,6 +7,7 @@ import {
   ProcedureResultError,
 } from './';
 
+type IsProcedureResultErrorLike<T> = T extends ProcedureResultError ? T : never;
 /***
  * Utility for creating a zod middleware
  */
@@ -50,7 +51,9 @@ export function contextSwapperMiddleware<TInputContext>() {
   return function factory<TNewContext, TError extends ProcedureResultError>(
     newContext: (
       params: Params<TInputContext>,
-    ) => MaybePromise<{ ctx: TNewContext } | TError>,
+    ) => MaybePromise<
+      { ctx: TNewContext } | IsProcedureResultErrorLike<TError>
+    >,
   ) {
     return function middleware<TInputParams extends {}>(): MiddlewareFunction<
       TInputParams,
