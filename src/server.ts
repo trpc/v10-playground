@@ -1,7 +1,7 @@
 import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import {
-  contextSwapperMiddleware,
+  contextSwapperMiddleware as createContextSwapperMiddleware,
   createRouterWithContext,
   inferProcedure,
   pipedResolver,
@@ -18,11 +18,11 @@ type TestContext = {
 
 // boilerplate for each app, in like a utils
 const resolver = pipedResolver<TestContext>();
-const swapContext = contextSwapperMiddleware<TestContext>();
+const swapContextMiddleware = createContextSwapperMiddleware<TestContext>();
 const createRouter = createRouterWithContext<TestContext>();
 
 ////////// app middlewares ////////
-const isAuthed = swapContext((params) => {
+const isAuthed = swapContextMiddleware((params) => {
   if (!params.ctx.user) {
     return {
       error: {
@@ -122,7 +122,7 @@ async function main() {
     type MyProcedure = inferProcedure<typeof appRouter['queries']['greeting']>;
 
     expectTypeOf<MyProcedure['ctx']>().toMatchTypeOf<{
-      user: { id: string };
+      user?: { id: string };
     }>();
 
     expectTypeOf<MyProcedure['data']>().toMatchTypeOf<{
