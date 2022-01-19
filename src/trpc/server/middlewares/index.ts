@@ -1,2 +1,2 @@
-export * from './createUseNewContext';
-export * from './useZod';
+export * from './newContext';
+export * from './zod';

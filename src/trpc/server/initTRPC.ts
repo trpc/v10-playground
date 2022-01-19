@@ -1,8 +1,8 @@
 import {
   createRouterWithContext,
-  createUseNewContext,
+  createNewContext,
   pipedResolver,
-  useZod,
+  zod,
 } from '.';
 
 export function initTRPC<TContext>() {
@@ -18,10 +18,10 @@ export function initTRPC<TContext>() {
     /**
      * Helper for creating a new context middleware
      */
-    newContext: createUseNewContext<TContext>(),
+    newContext: createNewContext<TContext>(),
     /**
      * Zod middlware
      */
-    zod: useZod,
+    zod: zod,
   };
 }

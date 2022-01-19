@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 import { InputSchema, MiddlewareFunction, ProcedureResultError } from '..';
 
 export type IsProcedureResultErrorLike<T> = T extends ProcedureResultError
@@ -7,7 +7,7 @@ export type IsProcedureResultErrorLike<T> = T extends ProcedureResultError
 /***
  * Utility for creating a zod middleware
  */
-export function useZod<TInputParams, TSchema extends z.ZodTypeAny>(
+export function zod<TInputParams, TSchema extends z.ZodTypeAny>(
   schema: TSchema,
 ): MiddlewareFunction<
   TInputParams,
