@@ -23,11 +23,4 @@ jobs:
         uses: bahmutov/npm-install@v1
 
       - name: Test
-        run: yarn test --ci --coverage --maxWorkers=2
-        env:
-          REACT_QUERY_VERSION: ${{ matrix.REACT_QUERY_VERSION }}
-
-      - uses: codecov/codecov-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-          directory: ./packages
+        run: yarn tsc --noEmit
