@@ -1,9 +1,10 @@
 import { Procedure, ProcedureResult } from './';
 
-type ProcedureRecord<TContext> = Record<
-  string,
-  Procedure<{ ctx: TContext }, ProcedureResult>
->;
+type ProcedureRecordValue<TContext> =
+  | Procedure<{ ctx: TContext }, ProcedureResult>
+  | ProcedureRecord<TContext>;
+
+type ProcedureRecord<TContext> = Record<string, ProcedureRecordValue<TContext>>;
 
 export interface ProceduresByType<TContext> {
   queries?: ProcedureRecord<TContext>;
