@@ -102,7 +102,7 @@ export function pipedResolver<TContext>() {
     MW2Params,
     ExcludeMiddlewareResult<TResult | MW1Result | MW2Result>
   >;
-  function middlewares(...args: any): any {
+  function middlewares(..._args: any): any {
     throw new Error('Unimplemented');
   }
 
