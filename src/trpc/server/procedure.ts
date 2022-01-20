@@ -39,25 +39,18 @@ export interface MiddlewareErrorResult<TParams>
 export type MiddlewareResult<TParams> =
   | MiddlewareOKResult<TParams>
   | MiddlewareErrorResult<TParams>;
-export type MiddlewareFunctionParams<TInputParams> = TInputParams & {
-  next: {
-    (): Promise<MiddlewareResult<TInputParams>>;
-    <T>(params: T): Promise<MiddlewareResult<T>>;
-  };
-};
+
 export type MiddlewareFunction<
   TInputParams,
   TNextParams,
   TResult extends ProcedureResult = never,
-> = (
-  params: MiddlewareFunctionParams<TInputParams>,
-) => Promise<MiddlewareResult<TNextParams> | TResult> | TResult;
+> = (params: TInputParams) => MaybePromise<TNextParams | TResult>;
 
 export interface Params<TContext> {
   ctx: TContext;
   rawInput?: unknown;
 }
-type ExcludeMiddlewareResult<T> = T extends MiddlewareResult<any> ? never : T;
+type ExcludeMiddlewareResult<T> = T extends ProcedureResult ? T : never;
 export type Procedure<TBaseParams, TResult extends ProcedureResult> = (
   params: TBaseParams,
 ) => MaybePromise<TResult>;

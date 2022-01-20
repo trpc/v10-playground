@@ -29,10 +29,10 @@ export function createNewContext<TInputContext>() {
         const result = await newContextCallback(params as any);
 
         if ('ctx' in result) {
-          return params.next({
+          return {
             ...params,
             ctx: result.ctx!,
-          });
+          };
         }
         return result;
       };

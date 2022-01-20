@@ -22,12 +22,12 @@ export function zod<TInputParams, TSchema extends z.ZodTypeAny>(
       await schema.safeParseAsync(rawInput);
 
     if (result.success) {
-      return params.next({
+      return {
         ...params,
         input: result,
         _input_in: null as any,
         _input_out: null as any,
-      });
+      };
     }
 
     const zod = (result as z.SafeParseError<zInput>).error.format();
