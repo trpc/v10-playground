@@ -50,7 +50,7 @@ export interface Params<TContext> {
   ctx: TContext;
   rawInput?: unknown;
 }
-type ExcludeNonResult<T> = T extends ProcedureResult ? T : never;
+type OnlyProcedureResult<T> = T extends ProcedureResult ? T : never;
 export type Procedure<TBaseParams, TResult extends ProcedureResult> = (
   params: TBaseParams,
 ) => MaybePromise<TResult>;
@@ -85,7 +85,7 @@ export function pipedResolver<TContext>() {
   ): ProcedureWithMeta<
     TBaseParams,
     MW1Params,
-    ExcludeNonResult<TResult | MW1Result>
+    OnlyProcedureResult<TResult | MW1Result>
   >;
   function middlewares<
     TResult extends ProcedureResult,
@@ -100,7 +100,7 @@ export function pipedResolver<TContext>() {
   ): ProcedureWithMeta<
     TBaseParams,
     MW2Params,
-    ExcludeNonResult<TResult | MW1Result | MW2Result>
+    OnlyProcedureResult<TResult | MW1Result | MW2Result>
   >;
   function middlewares(..._args: any): any {
     throw new Error('Unimplemented');
