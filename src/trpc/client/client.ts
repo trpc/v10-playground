@@ -21,7 +21,7 @@ export function createClient<TRouter extends ProceduresByType<any>>() {
     path: TProcedure,
     ...args: inferProcedureArgs<TProcedure>
   ): Promise<inferProcedure<TProcedure>['result']>;
-  function query(...args: any[]): any {
+  function query(..._args: any[]): any {
     throw new Error('Unimplemented');
   }
   function mutation<
@@ -37,7 +37,7 @@ export function createClient<TRouter extends ProceduresByType<any>>() {
     path: TProcedure,
     ...args: inferProcedureArgs<TProcedure>
   ): Promise<inferProcedure<TProcedure>['result']>;
-  function mutation(...args: any[]): any {
+  function mutation(..._args: any[]): any {
     throw new Error('Unimplemented');
   }
 

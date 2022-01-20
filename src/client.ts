@@ -11,6 +11,8 @@ async function main() {
     const greeting = await client.query(queries.greeting, { hello: 'world' });
     // you can CMD+click `post.all` below to get to the definition
     const posts = await client.query(queries['post.all']);
+
+    console.log({ greeting, posts });
   }
 
   {
@@ -18,6 +20,8 @@ async function main() {
     // (but then you can't click your way to the backend)
     const greeting = await client.query('greeting', { hello: 'string' });
     const posts = await client.query('post.all');
+
+    console.log({ greeting, posts });
   }
 }
 
