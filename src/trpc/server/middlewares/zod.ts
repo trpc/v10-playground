@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import { InputSchema, MiddlewareFunction, ProcedureResultError } from '..';
+import { InputSchema, Procedure, ProcedureResultError } from '..';
 
 export type IsProcedureResultErrorLike<T> = T extends ProcedureResultError
   ? T
@@ -9,7 +9,7 @@ export type IsProcedureResultErrorLike<T> = T extends ProcedureResultError
  */
 export function zod<TInputParams, TSchema extends z.ZodTypeAny>(
   schema: TSchema,
-): MiddlewareFunction<
+): Procedure<
   TInputParams,
   TInputParams & InputSchema<z.input<TSchema>, z.output<TSchema>>,
   { error: { code: 'BAD_REQUEST'; zod: z.ZodFormattedError<z.input<TSchema>> } }

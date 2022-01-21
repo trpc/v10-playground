@@ -1,9 +1,4 @@
-import {
-  MaybePromise,
-  MiddlewareFunction,
-  Params,
-  ProcedureResultError,
-} from '..';
+import { MaybePromise, Procedure, Params, ProcedureResultError } from '..';
 import { IsProcedureResultErrorLike } from './zod';
 
 /**
@@ -20,7 +15,7 @@ export function createNewContext<TInputContext>() {
       { ctx: TNewContext } | IsProcedureResultErrorLike<TError>
     >,
   ) {
-    return function newContext<TInputParams extends {}>(): MiddlewareFunction<
+    return function newContext<TInputParams extends {}>(): Procedure<
       TInputParams,
       Omit<TInputParams, 'ctx'> & { ctx: NonNullable<TNewContext> },
       TError

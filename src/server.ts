@@ -32,6 +32,14 @@ const isAuthed = trpc.newContext((params) => {
 /////////// app root router //////////
 export const appRouter = trpc.router({
   queries: {
+    vanilla(params) {
+      expectTypeOf(params).toMatchTypeOf<{
+        ctx: Context;
+      }>();
+      return {
+        data: null,
+      };
+    },
     'post.all': (params) => {
       expectTypeOf(params).toMatchTypeOf<{
         ctx: Context;

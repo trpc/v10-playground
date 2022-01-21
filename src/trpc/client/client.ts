@@ -2,21 +2,23 @@ import type { inferProcedure, Procedure, ProceduresByType } from '../server';
 
 type ValueOf<T> = T[keyof T];
 
-type inferProcedureArgs<TProcedure extends Procedure<any, any>> =
+type ExpectProcedure<T> = T extends Procedure<any, any, any> ? T : never;
+export type inferProcedureArgs<TProcedure extends Procedure<any, any, any>> =
   undefined extends inferProcedure<TProcedure>['_input_in']
     ? [inferProcedure<TProcedure>['_input_in']?]
     : [inferProcedure<TProcedure>['_input_in']];
 
 export function createClient<TRouter extends ProceduresByType<any>>() {
+  function query<TPath extends keyof TRouter['queries'] & string>(
+    path: [
+      path: TPath,
+      ...args: inferProcedureArgs<ExpectProcedure<TRouter['queries'][TPath]>>
+    ],
+  ): Promise<
+    inferProcedure<ExpectProcedure<TRouter['queries'][TPath]>>['result']
+  >;
   function query<
-    TPath extends keyof TRouter['queries'] & string,
-    TProcedure extends TRouter['queries'][TPath] & Procedure<any, any>,
-  >(
-    path: TPath,
-    ...args: inferProcedureArgs<TProcedure>
-  ): Promise<inferProcedure<TProcedure>['result']>;
-  function query<
-    TProcedure extends ValueOf<TRouter['queries']> & Procedure<any, any>,
+    TProcedure extends ValueOf<TRouter['queries']> & Procedure<any, any, any>,
   >(
     path: TProcedure,
     ...args: inferProcedureArgs<TProcedure>
@@ -26,13 +28,13 @@ export function createClient<TRouter extends ProceduresByType<any>>() {
   }
   function mutation<
     TPath extends keyof TRouter['mutations'] & string,
-    TProcedure extends TRouter['mutations'][TPath] & Procedure<any, any>,
+    TProcedure extends TRouter['mutations'][TPath] & Procedure<any, any, any>,
   >(
     path: TPath,
     ...args: inferProcedureArgs<TProcedure>
   ): Promise<inferProcedure<TProcedure>['result']>;
   function mutation<
-    TProcedure extends ValueOf<TRouter['mutations']> & Procedure<any, any>,
+    TProcedure extends ValueOf<TRouter['mutations']> & Procedure<any, any, any>,
   >(
     path: TProcedure,
     ...args: inferProcedureArgs<TProcedure>

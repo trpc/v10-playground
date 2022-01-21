@@ -11,15 +11,16 @@ async function main() {
     const greeting = await client.query(queries.greeting, { hello: 'world' });
     // you can CMD+click `post.all` below to get to the definition
     const posts = await client.query(queries['post.all']);
+    const vanilla = await client.query(queries['vanilla']);
 
-    console.log({ greeting, posts });
+    console.log({ greeting, posts, vanilla });
   }
 
   {
     // we can also use string based path if we prefer that
     // (but then you can't click your way to the backend)
-    const greeting = await client.query('greeting', { hello: 'string' });
-    const posts = await client.query('post.all');
+    const greeting = await client.query(['greeting', { hello: 'string' }]);
+    const posts = await client.query(['post.all']);
 
     console.log({ greeting, posts });
   }
