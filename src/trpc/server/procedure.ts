@@ -46,39 +46,39 @@ export type ProcedureMeta<TParams> = {
 export function pipedResolver<TContext>() {
   type TBaseParams = Params<TContext>;
 
-  function middlewares<TResult extends ProcedureResult>(
+  function pipe<TResult extends ProcedureResult>(
     resolver: Procedure<TBaseParams, TBaseParams, TResult>,
   ): Procedure<TBaseParams, TBaseParams, TResult>;
-  function middlewares<
+  function pipe<
     TResult extends ProcedureResult,
     MW1Params extends TBaseParams = TBaseParams,
     MW1Result extends ProcedureResult = never,
   >(
-    middleware1: Procedure<TBaseParams, MW1Params, MW1Result>,
-    resolver: Procedure<MW1Params, MW1Params, TResult>,
+    procedure1: Procedure<TBaseParams, MW1Params, MW1Result>,
+    procedure2: Procedure<MW1Params, MW1Params, TResult>,
   ): Procedure<
     TBaseParams,
     MW1Params,
     OnlyProcedureResult<TResult | MW1Result>
   >;
-  function middlewares<
+  function pipe<
     TResult extends ProcedureResult,
     MW1Params extends TBaseParams = TBaseParams,
     MW1Result extends ProcedureResult = never,
     MW2Params extends TBaseParams = MW1Params,
     MW2Result extends ProcedureResult = never,
   >(
-    middleware1: Procedure<TBaseParams, MW1Params, MW1Result>,
-    middleware2: Procedure<MW1Params, MW2Params, MW2Result>,
-    resolver: Procedure<MW2Params, MW1Params, TResult>,
+    procedure1: Procedure<TBaseParams, MW1Params, MW1Result>,
+    procedure2: Procedure<MW1Params, MW2Params, MW2Result>,
+    procedure3: Procedure<MW2Params, MW1Params, TResult>,
   ): Procedure<
     TBaseParams,
     MW2Params,
     OnlyProcedureResult<TResult | MW1Result | MW2Result>
   >;
-  function middlewares(..._args: any): any {
+  function pipe(..._args: any): any {
     throw new Error('Unimplemented');
   }
 
-  return middlewares;
+  return pipe;
 }
