@@ -12,7 +12,7 @@ type Context = {
 // boilerplate for each app, in like a utils
 const trpc = initTRPC<Context>();
 
-////////// app middlewares ////////
+////////// app operators ////////
 const isAuthed = trpc.newContext((params) => {
   if (!params.ctx.user) {
     return {

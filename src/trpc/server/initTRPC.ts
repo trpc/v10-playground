@@ -16,7 +16,7 @@ export function initTRPC<TContext>() {
      */
     router: createRouterWithContext<TContext>(),
     /**
-     * Helper for creating a new context middleware
+     * Helper for creating a new context
      */
     newContext: createNewContext<TContext>(),
     /**

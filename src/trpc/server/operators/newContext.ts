@@ -2,7 +2,7 @@ import { MaybePromise, Procedure, Params, ProcedureResultError } from '..';
 import { IsProcedureResultErrorLike } from './zod';
 
 /**
- * Utility for creating a middleware that swaps the context around
+ * Utility for creating operator that swaps the context around
  */
 export function createNewContext<TInputContext>() {
   return function newContextFactory<

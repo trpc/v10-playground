@@ -33,7 +33,7 @@ export type inferProcedure<TProcedure> = TProcedure extends Procedure<
       inferProcedureResult<TProcedure>
     >
   : never;
-///////////// reusable middlewares /////////
+///////////// reusable operators /////////
 export interface InputSchema<TInput, TOutput> {
   /**
    * Input value used by consumer.
