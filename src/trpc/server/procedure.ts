@@ -47,7 +47,7 @@ export function pipedResolver<TContext>() {
   type TBaseParams = Params<TContext>;
 
   function pipe<TResult extends ProcedureResult>(
-    resolver: Procedure<TBaseParams, TBaseParams, TResult>,
+    procedure1: Procedure<TBaseParams, TBaseParams, TResult>,
   ): Procedure<TBaseParams, TBaseParams, TResult>;
   function pipe<
     TResult extends ProcedureResult,
