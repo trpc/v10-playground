@@ -1,17 +1,15 @@
 import {
-  contextSwapperMiddleware,
   createRouterWithContext,
+  initTRPC,
   pipedResolver,
 } from '../../src/trpc/server';
 
 ////////////////////// app ////////////////////////////
 // context
-type TestContext = {
+type Context = {
   user?: {
     id: string;
   };
 };
 
-// boilerplate for each app, in like a utils
-export const resolver = pipedResolver<TestContext>();
-export const createRouter = createRouterWithContext<TestContext>();
+export const trpc = initTRPC<Context>();

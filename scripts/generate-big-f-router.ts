@@ -1,44 +1,67 @@
 import fs from 'fs';
-import path from 'path';
 
-const NUM_FILES_TO_GENERATE = 200;
+const NUM_FILES_TO_GENERATE = 100;
 const NUM_PROCEDURES_TO_GENERATE = 10;
+const WRAPPER = `
+import { trpc } from '../context';
+import { z } from 'zod';
+__IMPORTS__
 
-const CONTENTS = `
-/* eslint-disable */
-import * as trpc from '../../src';
-
-export const bigRouter = ${getBFR()}
-  .flat();
-`.trim();
-
-// Big F̶u̶c̶ Fantastic Router
-function getBFR() {
-  const serverDir = __dirname + '/../.big/server';
-  for (let fileIndex = 0; fileIndex < NUM_FILES_TO_GENERATE; fileIndex++) {
-    const prefixContent = `
-import { createRouter, resolver } from '../context';
-
-`.trim();
-    const file = [prefixContent];
-    for (
-      let procIndex = 0;
-      procIndex < NUM_PROCEDURES_TO_GENERATE;
-      procIndex++
-    ) {
-      file.push([''].join('\n'));
-    }
-    const contents = file.join('\n  ');
+export const __ROUTER_NAME__ = trpc.router({
+  queries: {
+    __CONTENT__
   }
-}
+});
+`.trim();
+// Big F̶u̶c̶ Fantastic Router
 
-const dir = path.join(
-  __dirname,
-  '..',
-  'packages',
-  'server',
-  'test',
-  '__generated__',
-);
-fs.mkdirSync(dir, { recursive: true });
-fs.writeFileSync(path.join(dir, 'bigRouter.ts'), CONTENTS);
+const SERVER_DIR = __dirname + '/../.big/server/routers';
+for (let routerIndex = 0; routerIndex < NUM_FILES_TO_GENERATE; routerIndex++) {
+  let [prefix, suffix] = WRAPPER.split('__CONTENT__');
+  prefix = prefix.replace('__IMPORTS__', '');
+  prefix = prefix.replace('__ROUTER_NAME__', `router${routerIndex}`);
+  const routerFile = [prefix];
+  for (let procIndex = 0; procIndex < NUM_PROCEDURES_TO_GENERATE; procIndex++) {
+    routerFile.push(
+      '\n' +
+        `
+  r${routerIndex}q${procIndex}: trpc.resolver(
+    trpc.zod(
+      z.object({
+        hello: z.string(),
+        lengthOf: z
+          .string()
+          .transform((s) => s.length)
+          .optional()
+          .default(''),
+      }),
+    ),
+    (params) => {
+      return {
+        data: {
+          input: params.input,
+        }
+      }
+    }
+  ),
+`.trim(),
+    );
+  }
+  routerFile.push(suffix);
+  const contents = routerFile.join('\n  ');
+  fs.writeFileSync(SERVER_DIR + `/router${routerIndex}.ts`, contents);
+}
+const imports = new Array(NUM_FILES_TO_GENERATE)
+  .fill('')
+  .map((_, index) => `import { router${index} } from './router${index}';`)
+  .join('\n');
+const content = new Array(NUM_FILES_TO_GENERATE)
+  .fill('')
+  .map((_, index) => `...router${index}.queries,`)
+  .join('\n');
+let indexFile = WRAPPER;
+indexFile = indexFile.replace('__IMPORTS__', imports);
+indexFile = indexFile.replace('__ROUTER_NAME__', `appRouter`);
+indexFile = indexFile.replace('__CONTENT__', content);
+
+fs.writeFileSync(SERVER_DIR + '/_app.ts', indexFile);
