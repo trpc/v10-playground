@@ -6,7 +6,8 @@
   "scripts": {
     "dev:server": "nodemon -e ts -w . -x ts-node ./src/server.ts",
     "dev:client": "nodemon -e ts -w . -x 'ts-node ./src/client.ts'",
-    "dev": "run-p dev:* --print-label",
+    "dev-run": "run-p dev:* --print-label",
+    "dev": "yarn tsc --watch --noEmit",
     "codegen": "yarn ts-node scripts/generate-big-f-router.ts"
   },
   "prettier": {
