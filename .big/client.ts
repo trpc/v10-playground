@@ -6,10 +6,12 @@ const client = createClient<typeof appRouter>();
 const { queries } = createRouterProxy<typeof appRouter>();
 
 async function main() {
-  const greeting = await client.query(queries.r99q5, { hello: 'world' });
-  const posts = await client.query('r99q5', { hello: 'world' });
+  const q1 = await client.query(queries.r99q5, { hello: 'world' });
+  // const q2 = await client.query('r99q5', { hello: 'world' });
 
-  console.log({ greeting, posts });
+  if ('data' in q1) {
+    console.log('data.input', q1.data.input);
+  }
 }
 
 main();

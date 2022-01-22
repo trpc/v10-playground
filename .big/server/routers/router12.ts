@@ -5,7 +5,6 @@ import { z } from 'zod';
 export const router12 = trpc.router({
   queries: {
     
-  
 r12q0: trpc.resolver(
     trpc.zod(
       z.object({
@@ -25,7 +24,7 @@ r12q0: trpc.resolver(
       }
     }
   ),
-  
+
 r12q1: trpc.resolver(
     trpc.zod(
       z.object({
@@ -45,7 +44,7 @@ r12q1: trpc.resolver(
       }
     }
   ),
-  
+
 r12q2: trpc.resolver(
     trpc.zod(
       z.object({
@@ -65,7 +64,7 @@ r12q2: trpc.resolver(
       }
     }
   ),
-  
+
 r12q3: trpc.resolver(
     trpc.zod(
       z.object({
@@ -85,7 +84,7 @@ r12q3: trpc.resolver(
       }
     }
   ),
-  
+
 r12q4: trpc.resolver(
     trpc.zod(
       z.object({
@@ -105,7 +104,7 @@ r12q4: trpc.resolver(
       }
     }
   ),
-  
+
 r12q5: trpc.resolver(
     trpc.zod(
       z.object({
@@ -125,7 +124,7 @@ r12q5: trpc.resolver(
       }
     }
   ),
-  
+
 r12q6: trpc.resolver(
     trpc.zod(
       z.object({
@@ -145,7 +144,7 @@ r12q6: trpc.resolver(
       }
     }
   ),
-  
+
 r12q7: trpc.resolver(
     trpc.zod(
       z.object({
@@ -165,7 +164,7 @@ r12q7: trpc.resolver(
       }
     }
   ),
-  
+
 r12q8: trpc.resolver(
     trpc.zod(
       z.object({
@@ -185,7 +184,7 @@ r12q8: trpc.resolver(
       }
     }
   ),
-  
+
 r12q9: trpc.resolver(
     trpc.zod(
       z.object({
@@ -205,6 +204,5 @@ r12q9: trpc.resolver(
       }
     }
   ),
-  
   }
 });
