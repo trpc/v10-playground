@@ -60,11 +60,16 @@ const checkUser = createNewContext<{
   };
 });
 
-const isUserPost = trpc.merge(
-  isAuthed(),
-  trpc.zod(z.object({ id: z.string() })),
-  checkUser(),
-);
+function isUserPost<TSchema extends z.ZodObject<{ id: z.ZodString }>>(
+  schema: TSchema,
+) {
+  return trpc.merge(
+    //
+    isAuthed(),
+    trpc.zod(schema),
+    checkUser(),
+  )();
+}
 
 /////////// app root router //////////
 export const appRouter = trpc.router({
@@ -134,8 +139,7 @@ export const appRouter = trpc.router({
     ),
     // mutation with auth + input
     'post.edit': trpc.resolver(
-      isUserPost(),
-      trpc.zod(
+      isUserPost(
         z.object({
           id: z.string(),
           title: z.string().optional(),
