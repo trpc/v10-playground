@@ -10,10 +10,17 @@ export interface ProceduresByType<TContext> {
   mutations?: ProcedureRecord<TContext>;
 }
 
+type ValidateShape<TActualShape, TExpectedShape> =
+  TActualShape extends TExpectedShape
+    ? Exclude<keyof TActualShape, keyof TExpectedShape> extends never
+      ? TActualShape
+      : TExpectedShape
+    : never;
+
 export function createRouterWithContext<TContext>() {
   return function createRouter<TProcedures extends ProceduresByType<TContext>>(
-    procedures: TProcedures,
+    procedures: ValidateShape<TProcedures, ProceduresByType<TContext>>,
   ): TProcedures {
-    return procedures;
+    return procedures as any;
   };
 }

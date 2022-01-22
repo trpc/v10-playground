@@ -63,8 +63,14 @@ async function main() {
     // no leaky
     const trpc = initTRPC();
     trpc.router({
-      queries: {},
-      // @ts-expect-error should not exist
+      queries: {
+        test: () => {
+          return {
+            data: 'ok',
+          };
+        },
+      },
+      // @ts-expect-error should error
       doesNotExist: {},
     });
   }
