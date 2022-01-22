@@ -26,8 +26,10 @@ for (const file of files) {
 }
 
 for (let routerIndex = 0; routerIndex < NUM_ROUTERS; routerIndex++) {
+  // generate router files
   const routerFile = [];
   for (let procIndex = 0; procIndex < NUM_PROCEDURES_PER_ROUTER; procIndex++) {
+    // generate procedures in each file
     routerFile.push(
       '\n' +
         `
@@ -53,12 +55,13 @@ for (let routerIndex = 0; routerIndex < NUM_ROUTERS; routerIndex++) {
 `.trim(),
     );
   }
-
+  // write router file
   const contents = WRAPPER.replace('__CONTENT__', routerFile.join('\n'))
     .replace('__IMPORTS__', '')
     .replace('__ROUTER_NAME__', `router${routerIndex}`);
   fs.writeFileSync(SERVER_DIR + `/router${routerIndex}.ts`, contents);
 }
+// write `_app.ts` index file that combines all the routers
 const imports = new Array(NUM_ROUTERS)
   .fill('')
   .map((_, index) => `import { router${index} } from './router${index}';`)
