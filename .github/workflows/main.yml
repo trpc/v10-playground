@@ -23,4 +23,6 @@ jobs:
         uses: bahmutov/npm-install@v1
 
       - name: Test
-        run: yarn tsc --noEmit
+        run: |
+          yarn tsc --noEmit
+          yarn tsc --noEmit --extendedDiagnostics .big/client.ts
