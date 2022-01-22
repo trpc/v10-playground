@@ -1,4 +1,3 @@
-import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import { initTRPC } from './trpc/server';
 
@@ -32,10 +31,8 @@ const isAuthed = trpc.newContext((params) => {
 /////////// app root router //////////
 export const appRouter = trpc.router({
   queries: {
-    'post.all': (params) => {
-      expectTypeOf(params).toMatchTypeOf<{
-        ctx: Context;
-      }>();
+    // simple procedure without args avialable at `post.all`
+    'post.all': (_params) => {
       return {
         data: [
           {
@@ -45,8 +42,8 @@ export const appRouter = trpc.router({
         ],
       };
     },
+    // procedure with input validation called `greeting`
     greeting: trpc.resolver(
-      // adds zod input validation
       trpc.zod(
         z.object({
           hello: z.string(),
@@ -58,12 +55,6 @@ export const appRouter = trpc.router({
         }),
       ),
       (params) => {
-        expectTypeOf(params.ctx).toMatchTypeOf<{ user?: { id: string } }>();
-        expectTypeOf(params.input).toMatchTypeOf<{
-          hello: string;
-          lengthOf: number;
-        }>();
-
         return {
           data: {
             greeting: 'hello ' + params.ctx.user?.id ?? params.input.hello,
@@ -71,12 +62,14 @@ export const appRouter = trpc.router({
         };
       },
     ),
-    whoami: trpc.resolver(
-      //
+    // procedure with auth
+    'viewer.whoami': trpc.resolver(
+      // `isAuthed()` will propagate new `ctx`
       isAuthed(),
       ({ ctx }) => {
         return { data: `your id is ${ctx.user.id}` };
       },
     ),
   },
+  mutations: {},
 });
