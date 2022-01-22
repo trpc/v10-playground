@@ -19,6 +19,8 @@ Early draft of how a future [tRPC](https://trpc.io)-version could look like.
 - Run `yarn codegen` (modify `./scripts/generate-big-f-router.ts` if you want)
 - Play with `./big/client.ts` and the connected routers to see how long it takes to get feedback
 
+> Please reach out if you have more scientific ways to do TypeScript compiler perf testing
+
 ## Goals & features
 
 - **More ergonomic API for creating procedures** and building out your backend
