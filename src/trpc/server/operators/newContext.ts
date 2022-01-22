@@ -26,7 +26,7 @@ export function createNewContext<TInputContext>() {
         if ('ctx' in result) {
           return {
             ...params,
-            ctx: result.ctx!,
+            ctx: result.ctx as NonNullable<TNewContext>,
           };
         }
         return result;
