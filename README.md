@@ -14,7 +14,10 @@ Early draft of how a future [tRPC](https://trpc.io)-version could look like.
 2. Try adding/removing/changing queries and mutations.
 3. Go to `src/client.ts` and play around
 
+### Big router performance testing
 
+- Run `yarn codegen` (modify `./scripts/generate-big-f-router.ts` if you want)
+- Play with `./big/client.ts` and the connected routers to see how long it takes to get feedback
 
 ## Goals & features
 

@@ -8,7 +8,8 @@
     "dev:client": "nodemon -e ts -w . -x 'ts-node ./src/client.ts'",
     "dev-run": "run-p dev:* --print-label",
     "dev": "yarn tsc --watch --noEmit",
-    "codegen": "yarn ts-node scripts/generate-big-f-router.ts"
+    "codegen": "yarn ts-node scripts/generate-big-f-router.ts",
+    "postinstall": "yarn codegen"
   },
   "prettier": {
     "printWidth": 80,
