@@ -1,4 +1,3 @@
-import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import { initTRPC } from './trpc/server';
 
@@ -33,9 +32,6 @@ const isAuthed = trpc.newContext((params) => {
 export const appRouter = trpc.router({
   queries: {
     'post.all': (params) => {
-      expectTypeOf(params).toMatchTypeOf<{
-        ctx: Context;
-      }>();
       return {
         data: [
           {
@@ -58,12 +54,6 @@ export const appRouter = trpc.router({
         }),
       ),
       (params) => {
-        expectTypeOf(params.ctx).toMatchTypeOf<{ user?: { id: string } }>();
-        expectTypeOf(params.input).toMatchTypeOf<{
-          hello: string;
-          lengthOf: number;
-        }>();
-
         return {
           data: {
             greeting: 'hello ' + params.ctx.user?.id ?? params.input.hello,
