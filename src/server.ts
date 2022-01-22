@@ -1,17 +1,14 @@
 import { z } from 'zod';
 import { initTRPC } from './trpc/server';
 
-////////////////////// app ////////////////////////////
+////////// app bootstrap & middlewares ////////
 type Context = {
   user?: {
     id: string;
   };
 };
-
-// boilerplate for each app, in like a utils
 const trpc = initTRPC<Context>();
 
-////////// app middlewares ////////
 const isAuthed = trpc.newContext((params) => {
   if (!params.ctx.user) {
     return {
@@ -28,18 +25,23 @@ const isAuthed = trpc.newContext((params) => {
   };
 });
 
+// mock db
+let postsDb = [
+  {
+    id: '1',
+    title: 'hello tRPC',
+    body: 'this is a preview of v10',
+    userId: 'KATT',
+  },
+];
+
 /////////// app root router //////////
 export const appRouter = trpc.router({
   queries: {
     // simple procedure without args avialable at `post.all`
     'post.all': (_params) => {
       return {
-        data: [
-          {
-            id: 1,
-            title: 'hello tRPC',
-          },
-        ],
+        data: postsDb,
       };
     },
     // procedure with input validation called `greeting`
@@ -67,9 +69,32 @@ export const appRouter = trpc.router({
       // `isAuthed()` will propagate new `ctx`
       isAuthed(),
       ({ ctx }) => {
+        // `ctx.user` is now `NonNullable`
         return { data: `your id is ${ctx.user.id}` };
       },
     ),
   },
-  mutations: {},
+  mutations: {
+    // mutation with auth + input
+    'post.add': trpc.resolver(
+      trpc.zod(
+        z.object({
+          title: z.string(),
+          body: z.string(),
+        }),
+      ),
+      isAuthed(),
+      ({ input, ctx }) => {
+        const post: typeof postsDb[number] = {
+          ...input,
+          id: `${Math.random()}`,
+          userId: ctx.user.id,
+        };
+        postsDb.push(post);
+        return {
+          data: post,
+        };
+      },
+    ),
+  },
 });
