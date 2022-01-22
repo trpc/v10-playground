@@ -1,13 +1,13 @@
 import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import { appRouter } from './server';
-import { inferProcedure } from './trpc/server';
+import { inferProcedure, initTRPC } from './trpc/server';
 
 ///////////// this below are just tests that the type checking is doing it's thing right ////////////
 async function main() {
   {
     // query 'whoami'
-    const result = await appRouter.queries.whoami({ ctx: {} });
+    const result = await appRouter.queries['viewer.whoami']({ ctx: {} });
     if ('error' in result) {
       expectTypeOf<typeof result['error']>().toMatchTypeOf<
         | {
@@ -58,6 +58,21 @@ async function main() {
       hello: string;
       lengthOf: number;
     }>();
+  }
+  {
+    // no leaky
+    const trpc = initTRPC();
+    trpc.router({
+      queries: {
+        test: () => {
+          return {
+            data: 'ok',
+          };
+        },
+      },
+      // @ts-expect-error should error
+      doesNotExist: {},
+    });
   }
 }
 main();

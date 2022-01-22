@@ -1,6 +1,6 @@
-import { MaybePromise, Procedure, Params, ProcedureResultError } from '..';
-import { IsProcedureResultErrorLike } from './zod';
+import { MaybePromise, Params, Procedure, ProcedureResultError } from '..';
 
+type IsProcedureResultErrorLike<T> = T extends ProcedureResultError ? T : never;
 /**
  * Utility for creating operator that swaps the context around
  */

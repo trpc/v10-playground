@@ -11,9 +11,8 @@ async function main() {
     const greeting = await client.query(queries.greeting, { hello: 'world' });
     // you can CMD+click `post.all` below to get to the definition
     const posts = await client.query(queries['post.all']);
-    const vanilla = await client.query(queries['vanilla']);
 
-    console.log({ greeting, posts, vanilla });
+    console.log({ greeting, posts });
   }
 
   {

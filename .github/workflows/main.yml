@@ -22,5 +22,5 @@ jobs:
       - name: Install deps and build (with cache)
         uses: bahmutov/npm-install@v1
 
-      - name: Test
-        run: yarn tsc --noEmit
+      - run: yarn tsc --noEmit
+      - run: yarn tsc --noEmit --extendedDiagnostics .big/client.ts
