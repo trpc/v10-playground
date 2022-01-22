@@ -35,7 +35,7 @@ let postsDb = [
   },
 ];
 
-interface CheckUserParams {
+interface CheckUserOwnsPostParams {
   ctx: {
     user: { id: string };
   };
@@ -43,32 +43,34 @@ interface CheckUserParams {
     id: string;
   };
 }
-const checkUser = createNewContext<CheckUserParams>()((params) => {
-  const post = postsDb.find((post) => post.id === params.input.id);
+const checkUserOwnsPost = createNewContext<CheckUserOwnsPostParams>()(
+  (params) => {
+    const post = postsDb.find((post) => post.id === params.input.id);
 
-  if (!post || params.ctx.user.id !== post.userId) {
+    if (!post || params.ctx.user.id !== post.userId) {
+      return {
+        error: {
+          code: 'FORBIDDEN',
+        },
+      };
+    }
     return {
-      error: {
-        code: 'FORBIDDEN',
+      ctx: {
+        ...params.ctx,
+        post,
       },
     };
-  }
-  return {
-    ctx: {
-      ...params.ctx,
-      post,
-    },
-  };
-});
+  },
+);
 
-function isUserPost<TSchema extends z.ZodObject<{ id: z.ZodString }>>(
+function userOwnsPost<TSchema extends z.ZodObject<{ id: z.ZodString }>>(
   schema: TSchema,
 ) {
   return merge<Context>()(
     //
     isAuthed(),
     trpc.zod(schema),
-    checkUser(),
+    checkUserOwnsPost(),
   )();
 }
 
@@ -140,7 +142,7 @@ export const appRouter = trpc.router({
     ),
     // mutation with auth + input
     'post.edit': trpc.resolver(
-      isUserPost(
+      userOwnsPost(
         z.object({
           id: z.string(),
           title: z.string().optional(),
