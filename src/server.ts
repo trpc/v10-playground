@@ -1,28 +1,19 @@
 import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
-import {
-  contextSwapperMiddleware,
-  createRouterWithContext,
-  inferProcedure,
-  pipedResolver,
-  zodMiddleware,
-} from './trpc/server';
+import { initTRPC } from './trpc/server';
 
 ////////////////////// app ////////////////////////////
-// context
-type TestContext = {
+type Context = {
   user?: {
     id: string;
   };
 };
 
 // boilerplate for each app, in like a utils
-const resolver = pipedResolver<TestContext>();
-const swapContext = contextSwapperMiddleware<TestContext>();
-const createRouter = createRouterWithContext<TestContext>();
+const trpc = initTRPC<Context>();
 
 ////////// app middlewares ////////
-const isAuthed = swapContext((params) => {
+const isAuthed = trpc.newContext((params) => {
   if (!params.ctx.user) {
     return {
       error: {
@@ -39,9 +30,12 @@ const isAuthed = swapContext((params) => {
 });
 
 /////////// app root router //////////
-export const appRouter = createRouter({
+export const appRouter = trpc.router({
   queries: {
     'post.all': (params) => {
+      expectTypeOf(params).toMatchTypeOf<{
+        ctx: Context;
+      }>();
       return {
         data: [
           {
@@ -51,9 +45,9 @@ export const appRouter = createRouter({
         ],
       };
     },
-    greeting: resolver(
+    greeting: trpc.resolver(
       // adds zod input validation
-      zodMiddleware(
+      trpc.zod(
         z.object({
           hello: z.string(),
           lengthOf: z
@@ -63,80 +57,26 @@ export const appRouter = createRouter({
             .default(''),
         }),
       ),
-      // swaps context to make sure the user is authenticated
-      // FIXME:
-      // isAuthed(),
-      // manual version of the `isAuthed()` above
-      async (params) => {
-        if (!params.ctx.user) {
-          return {
-            error: {
-              code: 'UNAUTHORIZED',
-            },
-          };
-        }
-        return params.next({
-          ...params,
-          ctx: {
-            ...params.ctx,
-            user: params.ctx.user,
-          },
-        });
-      },
       (params) => {
-        type TContext = typeof params.ctx;
-        type TInput = typeof params.input;
-        expectTypeOf<TContext>().toMatchTypeOf<{ user: { id: string } }>();
-        expectTypeOf<TInput>().toMatchTypeOf<{
+        expectTypeOf(params.ctx).toMatchTypeOf<{ user?: { id: string } }>();
+        expectTypeOf(params.input).toMatchTypeOf<{
           hello: string;
           lengthOf: number;
         }>();
 
         return {
           data: {
-            greeting: 'hello ' + params.ctx.user.id ?? params.input.hello,
+            greeting: 'hello ' + params.ctx.user?.id ?? params.input.hello,
           },
         };
       },
     ),
+    whoami: trpc.resolver(
+      //
+      isAuthed(),
+      ({ ctx }) => {
+        return { data: `your id is ${ctx.user.id}` };
+      },
+    ),
   },
 });
-
-async function main() {
-  // if you hover result we can see that we can infer both the result and every possible expected error
-  const result = await appRouter.queries.greeting({ ctx: {} });
-  if ('error' in result && result.error) {
-    console.log(result.error);
-    if ('zod' in result.error) {
-      // zod error inferred - useful for forms w/o libs
-      console.log(result.error.zod.hello?._errors);
-    }
-  } else if ('data' in result) {
-    console.log(result.data);
-  } else {
-    throw new Error("Procedure didn't return data");
-  }
-
-  // some type testing below
-  type MyProcedure = inferProcedure<typeof appRouter['queries']['greeting']>;
-
-  expectTypeOf<MyProcedure['ctx']>().toMatchTypeOf<{
-    user: { id: string };
-  }>();
-
-  expectTypeOf<MyProcedure['data']>().toMatchTypeOf<{
-    data: {
-      greeting: string;
-    };
-  }>();
-
-  expectTypeOf<MyProcedure['_input_in']>().toMatchTypeOf<{
-    hello: string;
-    lengthOf?: string;
-  }>();
-  expectTypeOf<MyProcedure['_input_out']>().toMatchTypeOf<{
-    hello: string;
-    lengthOf: number;
-  }>();
-}
-main();
