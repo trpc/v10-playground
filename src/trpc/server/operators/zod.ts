@@ -1,10 +1,13 @@
 import type { z } from 'zod';
-import { InputSchema, Procedure } from '..';
+import { InputSchema, Params, Procedure } from '..';
 
 /***
  * Utility for creating a zod middleware
  */
-export function zod<TInputParams, TSchema extends z.ZodTypeAny>(
+export function zod<
+  TInputParams extends Params<unknown>,
+  TSchema extends z.ZodTypeAny,
+>(
   schema: TSchema,
 ): Procedure<
   TInputParams,

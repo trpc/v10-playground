@@ -4,18 +4,20 @@ type IsProcedureResultErrorLike<T> = T extends ProcedureResultError ? T : never;
 /**
  * Utility for creating operator that swaps the context around
  */
-export function createNewContext<TInputContext>() {
+export function createNewContext<TInputParams extends Params<unknown>>() {
   return function newContextFactory<
     TNewContext,
     TError extends ProcedureResultError,
   >(
     newContextCallback: (
-      params: Params<TInputContext>,
+      params: TInputParams,
     ) => MaybePromise<
       { ctx: TNewContext } | IsProcedureResultErrorLike<TError>
     >,
   ) {
-    return function newContext<TInputParams extends {}>(): Procedure<
+    return function newContext<
+      TInputParams extends Params<unknown>,
+    >(): Procedure<
       TInputParams,
       Omit<TInputParams, 'ctx'> & { ctx: NonNullable<TNewContext> },
       TError

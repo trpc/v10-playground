@@ -3,6 +3,8 @@ import {
   createNewContext,
   pipedResolver,
   zod,
+  merge,
+  Params,
 } from '.';
 
 export function initTRPC<TContext>() {
@@ -18,10 +20,11 @@ export function initTRPC<TContext>() {
     /**
      * Helper for creating a new context
      */
-    newContext: createNewContext<TContext>(),
+    newContext: createNewContext<Params<TContext>>(),
     /**
      * Zod middlware
      */
     zod,
+    merge: merge<TContext>(),
   };
 }

@@ -22,7 +22,7 @@ export interface ProcedureResultError {
 export type ProcedureResult = ProcedureResultSuccess | ProcedureResultError;
 
 export type Procedure<
-  TInputParams,
+  TInputParams extends Params<unknown>,
   TNextParams,
   TResult extends ProcedureResult,
 > = (params: TInputParams) => MaybePromise<TNextParams | TResult>;
@@ -31,7 +31,11 @@ export interface Params<TContext> {
   ctx: TContext;
   rawInput?: unknown;
 }
-type OnlyProcedureResult<T> = T extends ProcedureResult ? T : never;
+type OnlyProcedureResult<T> = T extends ProcedureResult
+  ? ProcedureResult extends T
+    ? never
+    : T
+  : never;
 
 /**
  * @internal
@@ -51,34 +55,73 @@ export function pipedResolver<TContext>() {
   ): Procedure<TBaseParams, TBaseParams, TResult>;
   function pipe<
     TResult extends ProcedureResult,
-    MW1Params extends TBaseParams = TBaseParams,
-    MW1Result extends ProcedureResult = never,
+    P1Params extends TBaseParams = TBaseParams,
+    P1Result extends ProcedureResult = never,
   >(
-    procedure1: Procedure<TBaseParams, MW1Params, MW1Result>,
-    procedure2: Procedure<MW1Params, MW1Params, TResult>,
-  ): Procedure<
-    TBaseParams,
-    MW1Params,
-    OnlyProcedureResult<TResult | MW1Result>
-  >;
+    procedure1: Procedure<TBaseParams, P1Params, P1Result>,
+    procedure2: Procedure<P1Params, never, TResult>,
+  ): Procedure<TBaseParams, P1Params, OnlyProcedureResult<TResult | P1Result>>;
   function pipe<
     TResult extends ProcedureResult,
-    MW1Params extends TBaseParams = TBaseParams,
-    MW1Result extends ProcedureResult = never,
-    MW2Params extends TBaseParams = MW1Params,
-    MW2Result extends ProcedureResult = never,
+    P1Params extends TBaseParams = TBaseParams,
+    P1Result extends ProcedureResult = never,
+    P2Params extends P1Params = P1Params,
+    P2Result extends ProcedureResult = never,
   >(
-    procedure1: Procedure<TBaseParams, MW1Params, MW1Result>,
-    procedure2: Procedure<MW1Params, MW2Params, MW2Result>,
-    procedure3: Procedure<MW2Params, MW1Params, TResult>,
+    procedure1: Procedure<TBaseParams, P1Params, P1Result>,
+    procedure2: Procedure<P1Params, P2Params, P2Result>,
+    procedure3: Procedure<P2Params, never, TResult>,
   ): Procedure<
     TBaseParams,
-    MW2Params,
-    OnlyProcedureResult<TResult | MW1Result | MW2Result>
+    P2Params,
+    OnlyProcedureResult<TResult | P1Result | P2Result>
   >;
   function pipe(..._args: any): any {
     throw new Error('Unimplemented');
   }
 
   return pipe;
+}
+
+// export type ObservableInput<T> =
+//   | Observable<T>
+//   | InteropObservable<T>
+//   | AsyncIterable<T>
+//   | PromiseLike<T>
+//   | ArrayLike<T>
+//   | Iterable<T>
+//   | ReadableStreamLike<T>;
+
+// export type ObservableInputTuple<T> = {
+//   [K in keyof T]: ObservableInput<T[K]>;
+// };
+
+// export function mergeWith<T, A extends readonly unknown[]>(
+//   ...otherSources: [...ObservableInputTuple<A>]
+// ): OperatorFunction<T, T | A[number]> {
+//   return merge(...otherSources);
+// }
+
+export function merge<TContext>() {
+  type TBaseParams = Params<TContext>;
+  function _merge<
+    P1Params extends TBaseParams = TBaseParams,
+    P1Result extends ProcedureResult = never,
+    P2Params extends P1Params = P1Params,
+    P2Result extends ProcedureResult = never,
+    P3Params extends P2Params = P2Params,
+    P3Result extends ProcedureResult = never,
+  >(
+    procedure1: Procedure<TBaseParams, P1Params, OnlyProcedureResult<P1Result>>,
+    procedure2: Procedure<P1Params, P2Params, OnlyProcedureResult<P2Result>>,
+    procedure3: Procedure<P2Params, P3Params, OnlyProcedureResult<P3Result>>,
+  ): () => Procedure<
+    TBaseParams,
+    P3Params,
+    OnlyProcedureResult<P1Result | P2Result | P3Result>
+  >;
+  function _merge(..._args: any): any {
+    throw new Error('Unimplemented');
+  }
+  return _merge;
 }

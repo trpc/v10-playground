@@ -26,13 +26,14 @@ export function createClient<TRouter extends ProceduresByType<any>>() {
   function query(..._args: any[]): any {
     throw new Error('Unimplemented');
   }
-  function mutation<
-    TPath extends keyof TRouter['mutations'] & string,
-    TProcedure extends TRouter['mutations'][TPath] & Procedure<any, any, any>,
-  >(
-    path: TPath,
-    ...args: inferProcedureArgs<TProcedure>
-  ): Promise<inferProcedure<TProcedure>['result']>;
+  function mutation<TPath extends keyof TRouter['mutations'] & string>(
+    path: [
+      path: TPath,
+      ...args: inferProcedureArgs<ExpectProcedure<TRouter['mutations'][TPath]>>
+    ],
+  ): Promise<
+    inferProcedure<ExpectProcedure<TRouter['mutations'][TPath]>>['result']
+  >;
   function mutation<
     TProcedure extends ValueOf<TRouter['mutations']> & Procedure<any, any, any>,
   >(

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { initTRPC } from './trpc/server';
+import { createNewContext, initTRPC } from './trpc/server';
 
 ////////// app bootstrap & middlewares ////////
 type Context = {
@@ -34,6 +34,37 @@ let postsDb = [
     userId: 'KATT',
   },
 ];
+
+const checkUser = createNewContext<{
+  ctx: {
+    user: { id: string };
+  };
+  input: {
+    id: string;
+  };
+}>()((params) => {
+  const post = postsDb.find((post) => post.id === params.input.id);
+
+  if (!post || params.ctx.user.id !== post.userId) {
+    return {
+      error: {
+        code: 'FORBIDDEN',
+      },
+    };
+  }
+  return {
+    ctx: {
+      ...params.ctx,
+      post,
+    },
+  };
+});
+
+const isUserPost = trpc.merge(
+  isAuthed(),
+  trpc.zod(z.object({ id: z.string() })),
+  checkUser(),
+);
 
 /////////// app root router //////////
 export const appRouter = trpc.router({
@@ -91,8 +122,32 @@ export const appRouter = trpc.router({
           userId: ctx.user.id,
         };
         postsDb.push(post);
+        if (Math.random() < 0.5) {
+          return {
+            data: 'y',
+          };
+        }
         return {
           data: post,
+        };
+      },
+    ),
+    // mutation with auth + input
+    'post.edit': trpc.resolver(
+      isUserPost(),
+      trpc.zod(
+        z.object({
+          id: z.string(),
+          title: z.string().optional(),
+          body: z.string().optional(),
+        }),
+      ),
+      (params) => {
+        params.ctx.user.id;
+        params.ctx.post;
+
+        return {
+          data: params,
         };
       },
     ),

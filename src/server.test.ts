@@ -1,8 +1,12 @@
 import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import { appRouter } from './server';
+import { createClient } from './trpc/client';
+import { createRouterProxy } from './trpc/client/createRouterProxy';
 import { inferProcedure, initTRPC } from './trpc/server';
 
+const client = createClient<typeof appRouter>();
+const { mutations } = createRouterProxy<typeof appRouter>();
 ///////////// this below are just tests that the type checking is doing it's thing right ////////////
 async function main() {
   {
@@ -21,6 +25,9 @@ async function main() {
             }>;
           }
       >();
+    }
+    if ('data' in result) {
+      expectTypeOf(result.data).toMatchTypeOf<string>();
     }
   }
   {
@@ -73,6 +80,29 @@ async function main() {
       // @ts-expect-error should error
       doesNotExist: {},
     });
+  }
+  {
+    const result = await client.mutation(mutations['post.add'], {
+      title: 'asd',
+      body: 'asd',
+    });
+    if ('error' in result) {
+      console.log(result.error);
+    }
+    if ('data' in result) {
+      console.log(result.data);
+    }
+  }
+  {
+    const result = await client.mutation(mutations['post.edit'], {
+      id: '123',
+    });
+    if ('error' in result) {
+      console.log(result.error);
+    }
+    if ('data' in result) {
+      console.log(result.data);
+    }
   }
 }
 main();
