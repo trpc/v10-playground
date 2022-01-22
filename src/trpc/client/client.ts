@@ -7,14 +7,14 @@ type inferProcedureArgs<TProcedure extends Procedure<any, any>> =
     ? [inferProcedure<TProcedure>['_input_in']?]
     : [inferProcedure<TProcedure>['_input_in']];
 
+type ExpectProcedure<T> = T extends Procedure<any, any> ? T : never;
 export function createClient<TRouter extends ProceduresByType<any>>() {
-  function query<
-    TPath extends keyof TRouter['queries'] & string,
-    TProcedure extends TRouter['queries'][TPath] & Procedure<any, any>,
-  >(
+  function query<TPath extends keyof TRouter['queries'] & string>(
     path: TPath,
-    ...args: inferProcedureArgs<TProcedure>
-  ): Promise<inferProcedure<TProcedure>['result']>;
+    ...args: inferProcedureArgs<ExpectProcedure<TRouter['queries'][TPath]>>
+  ): Promise<
+    inferProcedure<ExpectProcedure<TRouter['queries'][TPath]>>['result']
+  >;
   function query<
     TProcedure extends ValueOf<TRouter['queries']> & Procedure<any, any>,
   >(

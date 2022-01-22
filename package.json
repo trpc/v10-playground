@@ -6,7 +6,10 @@
   "scripts": {
     "dev:server": "nodemon -e ts -w . -x ts-node ./src/server.ts",
     "dev:client": "nodemon -e ts -w . -x 'ts-node ./src/client.ts'",
-    "dev": "run-p dev:* --print-label"
+    "dev-run": "run-p dev:* --print-label",
+    "dev": "yarn tsc --watch --noEmit",
+    "codegen": "yarn ts-node scripts/generate-big-f-router.ts",
+    "postinstall": "yarn codegen"
   },
   "prettier": {
     "printWidth": 80,
@@ -24,5 +27,8 @@
     "wait-port": "^0.2.9",
     "zod": "3.11.6"
   },
-  "keywords": []
+  "keywords": [],
+  "devDependencies": {
+    "@types/node": "^17.0.10"
+  }
 }
