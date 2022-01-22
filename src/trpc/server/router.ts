@@ -24,3 +24,27 @@ export function createRouterWithContext<TContext>() {
     return procedures as any;
   };
 }
+type PrefixedRouters<TContext> = Record<string, ProceduresByType<TContext>>;
+
+type PrefixRouters<
+  T extends PrefixedRouters<any>,
+  TDelimiter extends string = '',
+> = {
+  queries: {
+    [TPath in keyof T as `${TPath &
+      string}${TDelimiter}${keyof T[TPath]['queries'] &
+      string}`]: T[TPath]['queries'];
+  };
+  mutations: {
+    [TPath in keyof T as `${TPath &
+      string}${TDelimiter}${keyof T[TPath]['mutations'] &
+      string}`]: T[TPath]['mutations'];
+  };
+};
+export function mergeRouters<
+  T extends PrefixedRouters<TContext>,
+  TContext,
+  TDelimiter extends string = '',
+>(_routers: T, _delimiter?: TDelimiter): PrefixRouters<T, TDelimiter> {
+  throw new Error('Unimplemente');
+}
