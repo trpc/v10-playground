@@ -1,7 +1,7 @@
 import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import { appRouter } from './server';
-import { inferProcedure } from './trpc/server';
+import { inferProcedure, initTRPC } from './trpc/server';
 
 ///////////// this below are just tests that the type checking is doing it's thing right ////////////
 async function main() {
@@ -58,6 +58,15 @@ async function main() {
       hello: string;
       lengthOf: number;
     }>();
+  }
+  {
+    // no leaky
+    const trpc = initTRPC();
+    trpc.router({
+      queries: {},
+      // @ts-expect-error should not exist
+      doesNotExist: {},
+    });
   }
 }
 main();
