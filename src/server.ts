@@ -31,7 +31,7 @@ const isAuthed = trpc.newContext((params) => {
 /////////// app root router //////////
 export const appRouter = trpc.router({
   queries: {
-    'post.all': (params) => {
+    'post.all': (_params) => {
       return {
         data: [
           {
