@@ -1,9 +1,6 @@
 import type { z } from 'zod';
-import { InputSchema, MiddlewareFunction, ProcedureResultError } from '..';
+import { InputSchema, MiddlewareFunction } from '..';
 
-export type IsProcedureResultErrorLike<T> = T extends ProcedureResultError
-  ? T
-  : never;
 /***
  * Utility for creating a zod middleware
  */

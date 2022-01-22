@@ -4,8 +4,8 @@ import {
   Params,
   ProcedureResultError,
 } from '..';
-import { IsProcedureResultErrorLike } from './zod';
 
+type IsProcedureResultErrorLike<T> = T extends ProcedureResultError ? T : never;
 /**
  * Utility for creating a middleware that swaps the context around
  */
@@ -31,7 +31,7 @@ export function createNewContext<TInputContext>() {
         if ('ctx' in result) {
           return params.next({
             ...params,
-            ctx: result.ctx!,
+            ctx: result.ctx as NonNullable<TNewContext>,
           });
         }
         return result;
