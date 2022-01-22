@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createNewContext, initTRPC } from './trpc/server';
+import { createNewContext, initTRPC, merge } from './trpc/server';
 
 ////////// app bootstrap & middlewares ////////
 type Context = {
@@ -35,14 +35,15 @@ let postsDb = [
   },
 ];
 
-const checkUser = createNewContext<{
+interface CheckUserParams {
   ctx: {
     user: { id: string };
   };
   input: {
     id: string;
   };
-}>()((params) => {
+}
+const checkUser = createNewContext<CheckUserParams>()((params) => {
   const post = postsDb.find((post) => post.id === params.input.id);
 
   if (!post || params.ctx.user.id !== post.userId) {
@@ -63,7 +64,7 @@ const checkUser = createNewContext<{
 function isUserPost<TSchema extends z.ZodObject<{ id: z.ZodString }>>(
   schema: TSchema,
 ) {
-  return trpc.merge(
+  return merge<Context>()(
     //
     isAuthed(),
     trpc.zod(schema),
