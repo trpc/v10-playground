@@ -1,10 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "lib": [
-      "ES2019",
-      "DOM"
-    ],
+    "lib": ["ES2019", "DOM"],
     "module": "commonjs",
     "target": "ES2019",
     "declaration": true,
@@ -16,9 +13,8 @@
     "strictPropertyInitialization": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitReturns": true
+    "noImplicitReturns": true,
+    "skipLibCheck": true
   },
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
