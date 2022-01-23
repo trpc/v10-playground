@@ -23,9 +23,7 @@ type inferProcedureParams<TProcedure extends Procedure<any, any>> =
     ? TParams
     : never;
 type inferProcedureResult<TProcedure extends Procedure<any, any>> =
-  TProcedure extends Procedure<any, infer TResult>
-    ? ExcludeErrorLike<TResult>
-    : never;
+  TProcedure extends Procedure<any, infer TResult> ? TResult : never;
 export type inferProcedure<TProcedure extends Procedure<any, any>> =
   ProcedureDefinition<
     inferProcedureParams<TProcedure>['ctx'],
