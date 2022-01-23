@@ -11,11 +11,9 @@ const trpc = initTRPC<Context>();
 
 const isAuthed = trpc.newContext((params) => {
   if (!params.ctx.user) {
-    return {
-      error: {
-        code: 'UNAUTHORIZED',
-      },
-    };
+    return trpc.error({
+      code: 'UNAUTHORIZED',
+    });
   }
   return {
     ctx: {
@@ -58,9 +56,7 @@ export const appRouter = trpc.router({
       ),
       (params) => {
         return {
-          data: {
-            greeting: 'hello ' + params.ctx.user?.id ?? params.input.hello,
-          },
+          greeting: 'hello ' + params.ctx.user?.id ?? params.input.hello,
         };
       },
     ),

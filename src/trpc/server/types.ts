@@ -1,8 +1,8 @@
 import { ProcedureResultError, Procedure, ProcedureWithMeta } from './';
 
 ///////////// inference helpers //////////
-type ExcludeErrorLike<T> = T extends ProcedureResultError ? never : T;
-type OnlyErrorLike<T> = T extends ProcedureResultError ? T : never;
+type ExcludeErrorLike<T> = T extends ProcedureResultError<any> ? never : T;
+type OnlyErrorLike<T> = T extends ProcedureResultError<any> ? T : never;
 export interface ProcedureDefinition<TContext, TInputIn, TInputOut, TResult>
   extends InputSchema<TInputIn, TInputOut> {
   ctx: TContext;
@@ -23,7 +23,9 @@ type inferProcedureParams<TProcedure extends Procedure<any, any>> =
     ? TParams
     : never;
 type inferProcedureResult<TProcedure extends Procedure<any, any>> =
-  TProcedure extends Procedure<any, infer TResult> ? TResult : never;
+  TProcedure extends Procedure<any, infer TResult>
+    ? ExcludeErrorLike<TResult>
+    : never;
 export type inferProcedure<TProcedure extends Procedure<any, any>> =
   ProcedureDefinition<
     inferProcedureParams<TProcedure>['ctx'],

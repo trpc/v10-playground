@@ -31,10 +31,8 @@ async function main() {
         // zod error inferred - useful for forms w/o libs
         console.log(result.error.zod.hello?._errors);
       }
-    } else if ('data' in result) {
-      console.log(result.data);
     } else {
-      throw new Error("Procedure didn't return data");
+      console.log(result);
     }
 
     // some type testing below
@@ -45,9 +43,7 @@ async function main() {
     }>();
 
     expectTypeOf<MyProcedure['data']>().toMatchTypeOf<{
-      data: {
-        greeting: string;
-      };
+      greeting: string;
     }>();
 
     expectTypeOf<MyProcedure['_input_in']>().toMatchTypeOf<{
