@@ -38,10 +38,14 @@ export const appRouter = trpc.router({
   queries: {
     // simple procedure without args avialable at `post.all`
     'post.all': (_params) => {
+      return postsDb;
+    },
+    // simple procedure without args avialable at `post.all`
+    'post.byId': trpc.resolver(() => {
       return {
         data: postsDb,
       };
-    },
+    }),
     // procedure with input validation called `greeting`
     greeting: trpc.resolver(
       trpc.zod(
@@ -66,7 +70,7 @@ export const appRouter = trpc.router({
       isAuthed(),
       ({ ctx }) => {
         // `ctx.user` is now `NonNullable`
-        return { data: `your id is ${ctx.user.id}` };
+        return `your id is ${ctx.user.id}`;
       },
     ),
   },

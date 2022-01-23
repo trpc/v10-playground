@@ -8,7 +8,7 @@ async function main() {
   {
     // query 'whoami'
     const result = await appRouter.queries['viewer.whoami']({ ctx: {} });
-    if ('error' in result) {
+    if (typeof result === 'object' && 'error' in result) {
       expectTypeOf<typeof result['error']>().toMatchTypeOf<
         | {
             code: 'UNAUTHORIZED';
@@ -61,9 +61,7 @@ async function main() {
     trpc.router({
       queries: {
         test: () => {
-          return {
-            data: 'ok',
-          };
+          return 'ok';
         },
       },
       // @ts-expect-error should error
