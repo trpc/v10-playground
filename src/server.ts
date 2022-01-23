@@ -40,12 +40,23 @@ export const appRouter = trpc.router({
     'post.all': (_params) => {
       return postsDb;
     },
-    // simple procedure without args avialable at `post.all`
-    'post.byId': trpc.resolver(() => {
-      return {
-        data: postsDb,
-      };
-    }),
+    // get post by id or 404 if it's not found
+    'post.byId': trpc.resolver(
+      trpc.zod(
+        z.object({
+          id: z.string(),
+        }),
+      ),
+      ({ input }) => {
+        const post = postsDb.find((post) => post.id === input.id);
+        if (!post) {
+          return trpc.error({ code: 'NOT_FOUND' });
+        }
+        return {
+          data: postsDb,
+        };
+      },
+    ),
     // procedure with input validation called `greeting`
     greeting: trpc.resolver(
       trpc.zod(
