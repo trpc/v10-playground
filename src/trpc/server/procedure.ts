@@ -24,38 +24,37 @@ export interface ProcedureResultError<
   error: TResultErrorData;
 }
 ///////// middleware implementation ///////////
-interface MiddlewareResultBase<TParams> {
+interface ResolverResultBase<TParams> {
   /**
-   * All middlewares should pass through their `next()`'s output.
-   * Requiring this marker makes sure that can't be forgotten at compile-time.
+   * If the resolver is a middleware, it should pass through their `next()`'s output.
    */
   readonly _middleware: typeof middlewareMarker;
   TParams: TParams;
 }
-export interface MiddlewareOKResult<TParams>
-  extends MiddlewareResultBase<TParams> {}
-export interface MiddlewareErrorResult<TParams>
-  extends MiddlewareResultBase<TParams>,
+export interface ResolverOKResult<TParams>
+  extends ResolverResultBase<TParams> {}
+export interface ResolverErrorResult<TParams>
+  extends ResolverResultBase<TParams>,
     ProcedureResultError<any> {}
-export type MiddlewareResult<TParams> =
-  | MiddlewareOKResult<TParams>
-  | MiddlewareErrorResult<TParams>;
-export type MiddlewareFunctionParams<TInputParams> = TInputParams & {
+export type ResolverResult<TParams> =
+  | ResolverOKResult<TParams>
+  | ResolverErrorResult<TParams>;
+export type ResolverParams<TInputParams> = TInputParams & {
   next: {
-    (): Promise<MiddlewareResult<TInputParams>>;
-    <T>(params: T): Promise<MiddlewareResult<T>>;
+    (): Promise<ResolverResult<TInputParams>>;
+    <T>(params: T): Promise<ResolverResult<T>>;
   };
 };
-export type MiddlewareFunction<TInputParams, TNextParams, TResult = never> = (
-  params: MiddlewareFunctionParams<TInputParams>,
-) => Promise<MiddlewareResult<TNextParams> | TResult> | TResult;
+export type Resolver<TInputParams, TNextParams, TResult = never> = (
+  params: ResolverParams<TInputParams>,
+) => Promise<ResolverResult<TNextParams> | TResult> | TResult;
 
 export interface Params<TContext> {
   ctx: TContext;
   rawInput?: unknown;
 }
 
-type ExcludeMiddlewareResult<T> = T extends MiddlewareResult<any> ? never : T;
+type ExcludeMiddlewareResult<T> = T extends ResolverResult<any> ? never : T;
 export type Procedure<_TBaseParams, TParams, TResult> = (
   ...args: inferProcedureArgs<TParams>
 ) => MaybePromise<TResult>;
@@ -64,15 +63,15 @@ export function pipedResolver<TContext>() {
   type TBaseParams = Params<TContext>;
 
   function middlewares<TResult>(
-    resolver: MiddlewareFunction<TBaseParams, never, TResult>,
+    resolver: Resolver<TBaseParams, never, TResult>,
   ): Procedure<TBaseParams, TBaseParams, TResult>;
   function middlewares<
     TResult,
     MW1Params extends TBaseParams = TBaseParams,
     MW1Result = never,
   >(
-    middleware1: MiddlewareFunction<TBaseParams, MW1Params, MW1Result>,
-    resolver: MiddlewareFunction<MW1Params, never, TResult>,
+    middleware1: Resolver<TBaseParams, MW1Params, MW1Result>,
+    resolver: Resolver<MW1Params, never, TResult>,
   ): Procedure<
     TBaseParams,
     MW1Params,
@@ -85,9 +84,9 @@ export function pipedResolver<TContext>() {
     MW2Params extends TBaseParams = MW1Params,
     MW2Result = never,
   >(
-    middleware1: MiddlewareFunction<TBaseParams, MW1Params, MW1Result>,
-    middleware2: MiddlewareFunction<MW1Params, MW2Params, MW2Result>,
-    resolver: MiddlewareFunction<MW2Params, never, TResult>,
+    middleware1: Resolver<TBaseParams, MW1Params, MW1Result>,
+    middleware2: Resolver<MW1Params, MW2Params, MW2Result>,
+    resolver: Resolver<MW2Params, never, TResult>,
   ): Procedure<
     TBaseParams,
     MW2Params,

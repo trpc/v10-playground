@@ -1,17 +1,12 @@
 import type { z } from 'zod';
-import {
-  error,
-  InputSchema,
-  MiddlewareFunction,
-  ProcedureResultError,
-} from '..';
+import { error, InputSchema, Resolver, ProcedureResultError } from '..';
 
 /***
  * Utility for creating a zod middleware
  */
 export function zod<TInputParams, TSchema extends z.ZodTypeAny>(
   schema: TSchema,
-): MiddlewareFunction<
+): Resolver<
   TInputParams,
   TInputParams & InputSchema<z.input<TSchema>, z.output<TSchema>>,
   ProcedureResultError<{

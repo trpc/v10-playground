@@ -1,9 +1,4 @@
-import {
-  MaybePromise,
-  MiddlewareFunction,
-  Params,
-  ProcedureResultError,
-} from '..';
+import { MaybePromise, Resolver, Params, ProcedureResultError } from '..';
 
 type IsProcedureResultErrorLike<T> = T extends ProcedureResultError<any>
   ? T
@@ -19,7 +14,7 @@ export function createNewContext<TInputContext>() {
       { ctx: TNewContext } | IsProcedureResultErrorLike<TError>
     >,
   ) {
-    return function newContext<TInputParams extends {}>(): MiddlewareFunction<
+    return function newContext<TInputParams extends {}>(): Resolver<
       TInputParams,
       Omit<TInputParams, 'ctx'> & { ctx: NonNullable<TNewContext> },
       TError
