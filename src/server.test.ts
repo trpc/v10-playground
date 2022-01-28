@@ -8,7 +8,7 @@ async function main() {
   {
     // query 'whoami'
     const result = await appRouter.queries['viewerWhoAmi']();
-    if (typeof result === 'object' && 'error' in result) {
+    if (result.error) {
       expectTypeOf<typeof result['error']>().toMatchTypeOf<
         | {
             code: 'UNAUTHORIZED';
@@ -60,9 +60,9 @@ async function main() {
     const trpc = initTRPC();
     trpc.router({
       queries: {
-        test: () => {
+        test: trpc.resolver(() => {
           return 'ok';
-        },
+        }),
       },
       // @ts-expect-error should error
       doesNotExist: {},

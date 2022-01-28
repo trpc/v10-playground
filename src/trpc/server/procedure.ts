@@ -26,15 +26,20 @@ export interface Params<TContext> {
   rawInput?: unknown;
 }
 
+export interface ProcedureOKResult<T> {
+  ok: true;
+  data: T;
+  error?: undefined;
+}
+export interface ProcedureErrorResult<T> {
+  ok: false;
+  error: T;
+  data?: undefined;
+}
+
 export type ProcedureResult<T> =
-  | {
-      ok: true;
-      data: ExcludeErrorLike<T>;
-    }
-  | {
-      ok: false;
-      error: OnlyErrorLike<T>['error'];
-    };
+  | ProcedureOKResult<ExcludeErrorLike<T>>
+  | ProcedureErrorResult<OnlyErrorLike<T>['error']>;
 
 export type Procedure<_TBaseParams, TParams, TResult> = (
   ...args: inferProcedureArgs<TParams>

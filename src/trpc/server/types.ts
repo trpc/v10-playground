@@ -1,4 +1,4 @@
-import { ProcedureResultError, Procedure } from './';
+import { ProcedureResultError, Procedure } from './procedure';
 
 ///////////// inference helpers //////////
 export type ExcludeErrorLike<T> = T extends ProcedureResultError<any>
