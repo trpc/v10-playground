@@ -36,8 +36,8 @@ let postsDb = [
 /////////// app root router //////////
 export const appRouter = trpc.router({
   queries: {
-    // simple procedure without args avialable at `post.all`
-    postAll: trpc.resolver((_params) => {
+    // simple procedure without args avialable at postAll`
+    postList: trpc.resolver((_params) => {
       return postsDb;
     }),
     // get post by id or 404 if it's not found
@@ -76,7 +76,7 @@ export const appRouter = trpc.router({
       },
     ),
     // procedure with auth
-    viewerWhoAmi: trpc.resolver(
+    viewerWhoami: trpc.resolver(
       // `isAuthed()` will propagate new `ctx`
       isAuthed(),
       ({ ctx }) => {
@@ -111,7 +111,9 @@ export const appRouter = trpc.router({
     fireAndForget: trpc.resolver(
       //
       trpc.zod(z.string()),
-      () => {},
+      () => {
+        // no return
+      },
     ),
   },
 });

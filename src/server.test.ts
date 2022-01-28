@@ -7,7 +7,7 @@ import { inferProcedure, initTRPC } from './trpc/server';
 async function main() {
   {
     // query 'whoami'
-    const result = await appRouter.queries['viewerWhoAmi']();
+    const result = await appRouter.queries['viewerWhoami']();
     if (result.error) {
       expectTypeOf<typeof result['error']>().toMatchTypeOf<
         | {
