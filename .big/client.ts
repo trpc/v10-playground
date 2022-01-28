@@ -8,10 +8,10 @@ const { queries } = createRouterProxy<typeof appRouter>();
 async function main() {
   const q1 = await client.query.r29q5({ hello: 'world' });
 
-  if ('error' in q1) {
-    console.log(q1);
+  if (q1.ok) {
+    console.log(q1.data);
   } else {
-    console.log(q1);
+    console.log(q1.error);
   }
 }
 
