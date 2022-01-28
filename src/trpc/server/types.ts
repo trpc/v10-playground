@@ -1,4 +1,4 @@
-import { ProcedureResultError, Procedure, ProcedureWithMeta } from './';
+import { ProcedureResultError, Procedure } from './';
 
 ///////////// inference helpers //////////
 type ExcludeErrorLike<T> = T extends ProcedureResultError<any> ? never : T;
@@ -11,35 +11,45 @@ type OmitErrorResultMarkersFromResult<T> = T extends ProcedureResultError<any>
   : T;
 
 export interface ProcedureDefinition<TContext, TInputIn, TInputOut, TResult>
-  extends InputSchema<TInputIn, TInputOut> {
-  ctx: TContext;
+  extends ResolverParams<TContext, TInputIn, TInputOut> {
   result: OmitErrorResultMarkersFromResult<TResult>;
   data: ExcludeErrorLike<TResult>;
   errors: ClientError<OnlyErrorLike<TResult>>;
 }
 
-type inferParamsInput<TParams> = TParams extends InputSchema<
-  infer TBefore,
-  infer TAfter
->
-  ? InputSchema<TBefore, TAfter>
-  : InputSchema<undefined, undefined>;
-type inferProcedureParams<TProcedure extends Procedure<any, any>> =
-  TProcedure extends ProcedureWithMeta<any, infer TParams, any>
-    ? TParams
-    : TProcedure extends Procedure<any, infer TParams>
-    ? TParams
+interface ResolverParams<TContext, TInputIn, TInputOut>
+  extends InputSchema<TInputIn, TInputOut> {
+  ctx: TContext;
+}
+
+type inferProcedureParams<TParams> = TParams extends {
+  ctx: infer TContext;
+}
+  ? TParams extends InputSchema<infer TInputIn, infer TInputOut>
+    ? ResolverParams<TContext, TInputIn, TInputOut>
+    : ResolverParams<TContext, undefined, undefined>
+  : never;
+
+export type inferProcedure<TProcedure extends Procedure<any, any, any>> =
+  TProcedure extends Procedure<infer _TBaseParams, infer TParams, infer TResult>
+    ? TParams extends inferProcedureParams<TParams>
+      ? ProcedureDefinition<
+          TParams['ctx'],
+          TParams['_input_in'],
+          TParams['_input_out'],
+          TResult
+        >
+      : never
     : never;
-type inferProcedureResult<TProcedure extends Procedure<any, any>> =
-  TProcedure extends Procedure<any, infer TResult> ? TResult : never;
-export type inferProcedure<TProcedure extends Procedure<any, any>> =
-  ProcedureDefinition<
-    inferProcedureParams<TProcedure>['ctx'],
-    inferParamsInput<inferProcedureParams<TProcedure>>['_input_in'],
-    inferParamsInput<inferProcedureParams<TProcedure>>['_input_out'],
-    inferProcedureResult<TProcedure>
-  >;
-///////////// reusable middlewares /////////
+
+export type inferProcedureArgs<TParams> = TParams extends {
+  _input_in: infer TInput;
+}
+  ? undefined extends TInput
+    ? [TInput?]
+    : [TInput]
+  : [];
+
 export interface InputSchema<TInput, TOutput> {
   /**
    * Input value used by consumer.

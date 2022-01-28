@@ -2,7 +2,7 @@ import { Procedure } from './';
 
 type ProcedureRecord<TContext> = Record<
   string,
-  Procedure<{ ctx: TContext }, any>
+  Procedure<{ ctx: TContext }, any, any>
 >;
 
 export interface ProceduresByType<TContext> {

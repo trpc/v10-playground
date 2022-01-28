@@ -37,11 +37,11 @@ let postsDb = [
 export const appRouter = trpc.router({
   queries: {
     // simple procedure without args avialable at `post.all`
-    'post.all': (_params) => {
+    postAll: trpc.resolver((_params) => {
       return postsDb;
-    },
+    }),
     // get post by id or 404 if it's not found
-    'post.byId': trpc.resolver(
+    postById: trpc.resolver(
       trpc.zod(
         z.object({
           id: z.string(),
@@ -76,7 +76,7 @@ export const appRouter = trpc.router({
       },
     ),
     // procedure with auth
-    'viewer.whoami': trpc.resolver(
+    viewerWhoAmi: trpc.resolver(
       // `isAuthed()` will propagate new `ctx`
       isAuthed(),
       ({ ctx }) => {
@@ -106,6 +106,12 @@ export const appRouter = trpc.router({
           data: post,
         };
       },
+    ),
+    // mutation without a return type
+    fireAndForget: trpc.resolver(
+      //
+      trpc.zod(z.string()),
+      () => {},
     ),
   },
 });

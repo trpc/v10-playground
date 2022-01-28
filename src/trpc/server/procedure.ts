@@ -1,3 +1,4 @@
+import { inferProcedureArgs } from '.';
 import { TRPC_ERROR_CODE_KEY } from './rpc';
 
 const middlewareMarker = Symbol('middlewareMarker');
@@ -53,39 +54,26 @@ export interface Params<TContext> {
   ctx: TContext;
   rawInput?: unknown;
 }
+
 type ExcludeMiddlewareResult<T> = T extends MiddlewareResult<any> ? never : T;
-export type Procedure<TBaseParams, TResult> = (
-  params: TBaseParams,
+export type Procedure<_TBaseParams, TParams, TResult> = (
+  ...args: inferProcedureArgs<TParams>
 ) => MaybePromise<TResult>;
-/**
- * @internal
- */
-export type ProcedureMeta<TParams> = {
-  /**
-   * @internal
-   */
-  _params: TParams;
-};
-export type ProcedureWithMeta<TBaseParams, TParams, TResult> = Procedure<
-  TBaseParams,
-  TResult
-> &
-  ProcedureMeta<TParams>;
 
 export function pipedResolver<TContext>() {
   type TBaseParams = Params<TContext>;
 
   function middlewares<TResult>(
-    resolver: Procedure<TBaseParams, TResult>,
-  ): ProcedureWithMeta<TBaseParams, TBaseParams, TResult>;
+    resolver: MiddlewareFunction<TBaseParams, never, TResult>,
+  ): Procedure<TBaseParams, TBaseParams, TResult>;
   function middlewares<
     TResult,
     MW1Params extends TBaseParams = TBaseParams,
     MW1Result = never,
   >(
     middleware1: MiddlewareFunction<TBaseParams, MW1Params, MW1Result>,
-    resolver: Procedure<MW1Params, TResult>,
-  ): ProcedureWithMeta<
+    resolver: MiddlewareFunction<MW1Params, never, TResult>,
+  ): Procedure<
     TBaseParams,
     MW1Params,
     ExcludeMiddlewareResult<TResult | MW1Result>
@@ -99,8 +87,8 @@ export function pipedResolver<TContext>() {
   >(
     middleware1: MiddlewareFunction<TBaseParams, MW1Params, MW1Result>,
     middleware2: MiddlewareFunction<MW1Params, MW2Params, MW2Result>,
-    resolver: Procedure<MW2Params, TResult>,
-  ): ProcedureWithMeta<
+    resolver: MiddlewareFunction<MW2Params, never, TResult>,
+  ): Procedure<
     TBaseParams,
     MW2Params,
     ExcludeMiddlewareResult<TResult | MW1Result | MW2Result>
