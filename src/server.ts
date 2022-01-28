@@ -87,7 +87,7 @@ export const appRouter = trpc.router({
   },
   mutations: {
     // mutation with auth + input
-    'post.add': trpc.resolver(
+    postAdd: trpc.resolver(
       trpc.zod(
         z.object({
           title: z.string(),
