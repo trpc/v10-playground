@@ -1,10 +1,18 @@
 import type { ProceduresByType } from '../server';
-import { createRouterProxy } from './createRouterProxy';
 
-export function createClient<TRouter extends ProceduresByType<any>>(): {
-  query: NonNullable<TRouter['queries']>;
-  mutation: NonNullable<TRouter['mutations']>;
-} {
+export function createRouterProxy<TRouter extends ProceduresByType<any>>() {
+  return new Proxy({} as any, {
+    get(_, type: string) {
+      return new Proxy({} as any, {
+        get(_, path: string) {
+          return type + '.' + path;
+        },
+      });
+    },
+  }) as any as TRouter;
+}
+
+export function createClient<TRouter extends ProceduresByType<any>>(): TRouter {
   const proxy = createRouterProxy<TRouter>();
 
   return proxy as any;
