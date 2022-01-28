@@ -1,4 +1,4 @@
-import { inferProcedureArgs } from '.';
+import { ExcludeErrorLike, inferProcedureArgs, OnlyErrorLike } from '.';
 import { Middleware } from './middlewares/core';
 import { TRPC_ERROR_CODE_KEY } from './rpc';
 
@@ -26,9 +26,19 @@ export interface Params<TContext> {
   rawInput?: unknown;
 }
 
+export type ProcedureResult<T> =
+  | {
+      ok: true;
+      data: ExcludeErrorLike<T>;
+    }
+  | {
+      ok: false;
+      error: OnlyErrorLike<T>['error'];
+    };
+
 export type Procedure<_TBaseParams, TParams, TResult> = (
   ...args: inferProcedureArgs<TParams>
-) => MaybePromise<TResult>;
+) => Promise<ProcedureResult<TResult>>;
 
 export function pipedResolver<TContext>() {
   type TBaseParams = Params<TContext>;

@@ -1,8 +1,10 @@
 import { ProcedureResultError, Procedure } from './';
 
 ///////////// inference helpers //////////
-type ExcludeErrorLike<T> = T extends ProcedureResultError<any> ? never : T;
-type OnlyErrorLike<T> = T extends ProcedureResultError<any> ? T : never;
+export type ExcludeErrorLike<T> = T extends ProcedureResultError<any>
+  ? never
+  : T;
+export type OnlyErrorLike<T> = T extends ProcedureResultError<any> ? T : never;
 export interface ClientError<T extends ProcedureResultError<any>> {
   error: T['error'];
 }
