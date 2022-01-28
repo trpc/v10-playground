@@ -12,7 +12,15 @@ function createRouterProxy<TRouter extends ProceduresByType<any>>() {
   }) as any as TRouter;
 }
 
-export function createClient<TRouter extends ProceduresByType<any>>(): TRouter {
+export interface TRPCClient<TRouter extends ProceduresByType<any>> {
+  query: NonNullable<TRouter['queries']>;
+  mutation: NonNullable<TRouter['mutations']>;
+  $query: never; // Observable version of query?
+}
+
+export function createClient<
+  TRouter extends ProceduresByType<any>,
+>(): TRPCClient<TRouter> {
   const proxy = createRouterProxy<TRouter>();
 
   return proxy as any;
