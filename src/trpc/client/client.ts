@@ -71,22 +71,22 @@ type betterRoute<
 > = Key extends `${infer A}.${infer B}`
   ? { [k in A]: betterRoute<B, FullKey, Procs> }
   : { [k in Key]: procToHook<Procs, FullKey> };
-type proxyClient<TProcs extends ProcedureRecord<any>> = unionToIntersection<
+type nestedClient<TProcs extends ProcedureRecord<any>> = unionToIntersection<
   keyof TProcs extends string
     ? betterRoute<keyof TProcs, keyof TProcs, TProcs>
     : unknown
 >;
-export function createProxyClient<
-  TRouter extends ProceduresByType<any>,
->(): proxyClient<noUndefined<TRouter['queries']>> {
+export function createNestedClient<TRouter extends ProceduresByType<any>>(): {
+  query: nestedClient<noUndefined<TRouter['queries']>>;
+} {
   return 'asdf' as any;
 }
 
 type flatClient<TProcs extends ProcedureRecord<any>> = {
   [k in keyof TProcs]: procToHook<TProcs, k>;
 };
-export function createFlatClient<
-  TRouter extends ProceduresByType<any>,
->(): flatClient<noUndefined<TRouter['queries']>> {
+export function createFlatClient<TRouter extends ProceduresByType<any>>(): {
+  query: flatClient<noUndefined<TRouter['queries']>>;
+} {
   return 'asdf' as any;
 }
