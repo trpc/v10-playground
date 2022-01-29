@@ -1,11 +1,16 @@
 import type { appRouter } from './server';
-import { createClient, createBetterClient } from './trpc/client';
+import {
+  createClient,
+  createProxyClient,
+  createFlatClient,
+} from './trpc/client';
 import { createRouterProxy } from './trpc/client/createRouterProxy';
 
 const client = createClient<typeof appRouter>();
-const betterClient = createBetterClient<typeof appRouter>();
+const proxyClient = createProxyClient<typeof appRouter>();
+const flatClient = createFlatClient<typeof appRouter>();
 
-betterClient.post.some();
+proxyClient.post.some();
 
 const { queries } = createRouterProxy<typeof appRouter>();
 
@@ -28,11 +33,20 @@ async function main() {
     console.log({ greeting, posts });
   }
 
-  // full dot-notation RPC
-  // no "Go to definition
+  // nested function-call API
+  // "Go to definition" doesn't work
   {
-    const greeting = await betterClient.greeting({ hello: 'string' });
-    const posts = await betterClient.post.all();
+    const greeting = await proxyClient.greeting({ hello: 'string' });
+    const posts = await proxyClient.post.all();
+    console.log({ greeting, posts });
+  }
+
+  // "flat" function-call API
+  // "Go to definition" does work
+  // users who dislike the square brackets should avoid nested routers 🤷‍♂️
+  {
+    const greeting = await flatClient.greeting({ hello: 'string' });
+    const posts = await flatClient['post.all']();
     console.log({ greeting, posts });
   }
 }
