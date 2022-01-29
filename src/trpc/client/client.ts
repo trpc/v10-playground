@@ -1,4 +1,9 @@
-import type { inferProcedure, Procedure, ProceduresByType } from '../server';
+import type {
+  inferProcedure,
+  Procedure,
+  ProcedureRecord,
+  ProceduresByType,
+} from '../server';
 
 type ValueOf<T> = T[keyof T];
 
@@ -45,4 +50,34 @@ export function createClient<TRouter extends ProceduresByType<any>>() {
     query,
     mutation,
   };
+}
+
+type noUndefined<T> = T extends undefined ? never : T;
+type unionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+  k: infer I,
+) => void
+  ? I
+  : never;
+type procToHook<
+  TProcs extends ProcedureRecord<any>,
+  Key extends keyof TProcs,
+> = (
+  ...args: inferProcedureArgs<ExpectProcedure<TProcs[Key]>>
+) => Promise<inferProcedure<ExpectProcedure<TProcs[Key]>>['result']>;
+type betterRoute<
+  Key extends string,
+  FullKey extends string,
+  Procs extends ProcedureRecord<any>,
+> = Key extends `${infer A}.${infer B}`
+  ? { [k in A]: betterRoute<B, FullKey, Procs> }
+  : { [k in Key]: procToHook<Procs, FullKey> };
+type betterClient<TProcs extends ProcedureRecord<any>> = unionToIntersection<
+  keyof TProcs extends string
+    ? betterRoute<keyof TProcs, keyof TProcs, TProcs>
+    : unknown
+>;
+export function createBetterClient<
+  TRouter extends ProceduresByType<any>,
+>(): betterClient<noUndefined<TRouter['queries']>> {
+  return 'asdf' as any;
 }

@@ -1,8 +1,12 @@
 import type { appRouter } from './server';
-import { createClient } from './trpc/client';
+import { createClient, createBetterClient } from './trpc/client';
 import { createRouterProxy } from './trpc/client/createRouterProxy';
 
 const client = createClient<typeof appRouter>();
+const betterClient = createBetterClient<typeof appRouter>();
+
+betterClient.post.some();
+
 const { queries } = createRouterProxy<typeof appRouter>();
 
 async function main() {
@@ -21,6 +25,14 @@ async function main() {
     const greeting = await client.query('greeting', { hello: 'string' });
     const posts = await client.query('post.all');
 
+    console.log({ greeting, posts });
+  }
+
+  // full dot-notation RPC
+  // no "Go to definition
+  {
+    const greeting = await betterClient.greeting({ hello: 'string' });
+    const posts = await betterClient.post.all();
     console.log({ greeting, posts });
   }
 }

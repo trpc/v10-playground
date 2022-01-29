@@ -1,6 +1,6 @@
 import { Procedure, ProcedureResult } from './';
 
-type ProcedureRecord<TContext> = Record<
+export type ProcedureRecord<TContext> = Record<
   string,
   Procedure<{ ctx: TContext }, ProcedureResult>
 >;

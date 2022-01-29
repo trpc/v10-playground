@@ -44,6 +44,11 @@ export const appRouter = trpc.router({
         data: postsDb,
       };
     },
+    ['post.some']: (_params) => {
+      return {
+        data: postsDb,
+      };
+    },
     // procedure with input validation called `greeting`
     greeting: trpc.resolver(
       trpc.zod(
