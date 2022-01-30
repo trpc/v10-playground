@@ -84,6 +84,13 @@ export const appRouter = trpc.router({
         return `your id is ${ctx.user.id}`;
       },
     ),
+    // a bit iffy - if you want to use it without `trpc.resolver()`
+    aQueryWithoutResolverWrapper: () => {
+      return {
+        ok: true,
+        data: 'test',
+      };
+    },
   },
   mutations: {
     // mutation with auth + input

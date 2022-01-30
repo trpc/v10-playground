@@ -43,7 +43,7 @@ export type ProcedureResult<T> =
 
 export type Procedure<_TBaseParams, TParams, TResult> = (
   ...args: inferProcedureArgs<TParams>
-) => Promise<ProcedureResult<TResult>>;
+) => MaybePromise<ProcedureResult<TResult>>;
 
 export function pipedResolver<TContext>() {
   type TBaseParams = Params<TContext>;
