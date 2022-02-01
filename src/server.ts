@@ -11,11 +11,9 @@ const trpc = initTRPC<Context>();
 
 const isAuthed = trpc.newContext((params) => {
   if (!params.ctx.user) {
-    return {
-      error: {
-        code: 'UNAUTHORIZED',
-      },
-    };
+    return trpc.error({
+      code: 'UNAUTHORIZED',
+    });
   }
   return {
     ctx: {
@@ -40,10 +38,25 @@ export const appRouter = trpc.router({
   queries: {
     // simple procedure without args avialable at `post.all`
     'post.all': (_params) => {
-      return {
-        data: postsDb,
-      };
+      return postsDb;
     },
+    // get post by id or 404 if it's not found
+    'post.byId': trpc.resolver(
+      trpc.zod(
+        z.object({
+          id: z.string(),
+        }),
+      ),
+      ({ input }) => {
+        const post = postsDb.find((post) => post.id === input.id);
+        if (!post) {
+          return trpc.error({ code: 'NOT_FOUND' });
+        }
+        return {
+          data: postsDb,
+        };
+      },
+    ),
     // procedure with input validation called `greeting`
     greeting: trpc.resolver(
       trpc.zod(
@@ -58,9 +71,7 @@ export const appRouter = trpc.router({
       ),
       (params) => {
         return {
-          data: {
-            greeting: 'hello ' + params.ctx.user?.id ?? params.input.hello,
-          },
+          greeting: 'hello ' + params.ctx.user?.id ?? params.input.hello,
         };
       },
     ),
@@ -70,7 +81,7 @@ export const appRouter = trpc.router({
       isAuthed(),
       ({ ctx }) => {
         // `ctx.user` is now `NonNullable`
-        return { data: `your id is ${ctx.user.id}` };
+        return `your id is ${ctx.user.id}`;
       },
     ),
   },

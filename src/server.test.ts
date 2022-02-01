@@ -8,7 +8,7 @@ async function main() {
   {
     // query 'whoami'
     const result = await appRouter.queries['viewer.whoami']({ ctx: {} });
-    if ('error' in result) {
+    if (typeof result === 'object' && 'error' in result) {
       expectTypeOf<typeof result['error']>().toMatchTypeOf<
         | {
             code: 'UNAUTHORIZED';
@@ -31,10 +31,8 @@ async function main() {
         // zod error inferred - useful for forms w/o libs
         console.log(result.error.zod.hello?._errors);
       }
-    } else if ('data' in result) {
-      console.log(result.data);
     } else {
-      throw new Error("Procedure didn't return data");
+      console.log(result);
     }
 
     // some type testing below
@@ -45,9 +43,7 @@ async function main() {
     }>();
 
     expectTypeOf<MyProcedure['data']>().toMatchTypeOf<{
-      data: {
-        greeting: string;
-      };
+      greeting: string;
     }>();
 
     expectTypeOf<MyProcedure['_input_in']>().toMatchTypeOf<{
@@ -65,9 +61,7 @@ async function main() {
     trpc.router({
       queries: {
         test: () => {
-          return {
-            data: 'ok',
-          };
+          return 'ok';
         },
       },
       // @ts-expect-error should error
