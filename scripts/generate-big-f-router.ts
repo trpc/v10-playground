@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 const NUM_ROUTERS = 100;
-const NUM_PROCEDURES_PER_ROUTER = 10;
+const NUM_PROCEDURES_PER_ROUTER = 30;
 
 const WRAPPER = `
 import { trpc } from '../context';
