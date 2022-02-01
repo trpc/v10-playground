@@ -13,6 +13,7 @@ export const __ROUTER_NAME__ = trpc.router({
     __CONTENT__
   }
 });
+
 `.trim();
 
 const SERVER_DIR = __dirname + '/../.big/server/routers';
