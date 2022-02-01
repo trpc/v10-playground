@@ -4,6 +4,7 @@ import {
   pipedResolver,
   zod,
   mergeRouters,
+  error,
 } from '.';
 
 export function initTRPC<TContext>() {
@@ -25,5 +26,6 @@ export function initTRPC<TContext>() {
      */
     zod,
     mergeRouters,
+    error,
   };
 }

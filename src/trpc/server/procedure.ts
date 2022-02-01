@@ -1,6 +1,7 @@
 import { TRPC_ERROR_CODE_KEY } from './rpc';
 
 const middlewareMarker = Symbol('middlewareMarker');
+const errorMarker = Symbol('errorMarker');
 ///////////// utils //////////////
 
 export type MaybePromise<T> = T | Promise<T>;
@@ -11,31 +12,30 @@ export type MaybePromise<T> = T | Promise<T>;
  * For tRPC we're copying the last digits of HTTP 4XX errors.
  */
 //////// response shapes //////////
-export interface ProcedureResultSuccess {
-  data?: unknown;
-}
+
 export interface ResultErrorData {
   code: TRPC_ERROR_CODE_KEY;
 }
-export interface ProcedureResultError {
-  error: ResultErrorData;
+export interface ProcedureResultError<
+  TResultErrorData extends ResultErrorData,
+> {
+  readonly _error: typeof errorMarker;
+  error: TResultErrorData;
 }
-export type ProcedureResult = ProcedureResultSuccess | ProcedureResultError;
 ///////// middleware implementation ///////////
 interface MiddlewareResultBase<TParams> {
   /**
    * All middlewares should pass through their `next()`'s output.
    * Requiring this marker makes sure that can't be forgotten at compile-time.
    */
-  readonly marker: typeof middlewareMarker;
+  readonly _middleware: typeof middlewareMarker;
   TParams: TParams;
 }
 export interface MiddlewareOKResult<TParams>
-  extends MiddlewareResultBase<TParams>,
-    ProcedureResultSuccess {}
+  extends MiddlewareResultBase<TParams> {}
 export interface MiddlewareErrorResult<TParams>
   extends MiddlewareResultBase<TParams>,
-    ProcedureResultError {}
+    ProcedureResultError<any> {}
 export type MiddlewareResult<TParams> =
   | MiddlewareOKResult<TParams>
   | MiddlewareErrorResult<TParams>;
@@ -45,11 +45,7 @@ export type MiddlewareFunctionParams<TInputParams> = TInputParams & {
     <T>(params: T): Promise<MiddlewareResult<T>>;
   };
 };
-export type MiddlewareFunction<
-  TInputParams,
-  TNextParams,
-  TResult extends ProcedureResult = never,
-> = (
+export type MiddlewareFunction<TInputParams, TNextParams, TResult = never> = (
   params: MiddlewareFunctionParams<TInputParams>,
 ) => Promise<MiddlewareResult<TNextParams> | TResult> | TResult;
 
@@ -58,7 +54,7 @@ export interface Params<TContext> {
   rawInput?: unknown;
 }
 type ExcludeMiddlewareResult<T> = T extends MiddlewareResult<any> ? never : T;
-export type Procedure<TBaseParams, TResult extends ProcedureResult> = (
+export type Procedure<TBaseParams, TResult> = (
   params: TBaseParams,
 ) => MaybePromise<TResult>;
 /**
@@ -79,13 +75,13 @@ export type ProcedureWithMeta<TBaseParams, TParams, TResult> = Procedure<
 export function pipedResolver<TContext>() {
   type TBaseParams = Params<TContext>;
 
-  function middlewares<TResult extends ProcedureResult>(
+  function middlewares<TResult>(
     resolver: Procedure<TBaseParams, TResult>,
   ): ProcedureWithMeta<TBaseParams, TBaseParams, TResult>;
   function middlewares<
-    TResult extends ProcedureResult,
+    TResult,
     MW1Params extends TBaseParams = TBaseParams,
-    MW1Result extends ProcedureResult = never,
+    MW1Result = never,
   >(
     middleware1: MiddlewareFunction<TBaseParams, MW1Params, MW1Result>,
     resolver: Procedure<MW1Params, TResult>,
@@ -95,11 +91,11 @@ export function pipedResolver<TContext>() {
     ExcludeMiddlewareResult<TResult | MW1Result>
   >;
   function middlewares<
-    TResult extends ProcedureResult,
+    TResult,
     MW1Params extends TBaseParams = TBaseParams,
-    MW1Result extends ProcedureResult = never,
+    MW1Result = never,
     MW2Params extends TBaseParams = MW1Params,
-    MW2Result extends ProcedureResult = never,
+    MW2Result = never,
   >(
     middleware1: MiddlewareFunction<TBaseParams, MW1Params, MW1Result>,
     middleware2: MiddlewareFunction<MW1Params, MW2Params, MW2Result>,
@@ -114,4 +110,13 @@ export function pipedResolver<TContext>() {
   }
 
   return middlewares;
+}
+
+export function error<T extends ResultErrorData>(
+  err: T,
+): ProcedureResultError<T> {
+  return {
+    error: err,
+    _error: errorMarker,
+  };
 }

@@ -5,15 +5,14 @@ import {
   ProcedureResultError,
 } from '..';
 
-type IsProcedureResultErrorLike<T> = T extends ProcedureResultError ? T : never;
+type IsProcedureResultErrorLike<T> = T extends ProcedureResultError<any>
+  ? T
+  : never;
 /**
  * Utility for creating a middleware that swaps the context around
  */
 export function createNewContext<TInputContext>() {
-  return function newContextFactory<
-    TNewContext,
-    TError extends ProcedureResultError,
-  >(
+  return function newContextFactory<TNewContext, TError>(
     newContextCallback: (
       params: Params<TInputContext>,
     ) => MaybePromise<
