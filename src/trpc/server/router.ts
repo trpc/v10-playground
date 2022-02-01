@@ -52,20 +52,20 @@ export function mergeRouters<TRouters extends ProceduresByType<any>[]>(
 }
 
 // FIXME delete these comments
-type TestContext = {
-  ok: true;
-};
-const routerA = createRouterWithContext<TestContext>()({
-  queries: {
-    a: async () => ({ data: 'a' as const }),
-  },
-});
+// type TestContext = {
+//   ok: true;
+// };
+// const routerA = createRouterWithContext<TestContext>()({
+//   queries: {
+//     a: async () => ({ data: 'a' as const }),
+//   },
+// });
 
-const routerB = createRouterWithContext<TestContext>()({
-  queries: {
-    b: async ({ ctx }) => ({ data: 'b' as const, ctx }),
-  },
-});
-const routerMerged = mergeRouters(routerA, routerB);
+// const routerB = createRouterWithContext<TestContext>()({
+//   queries: {
+//     b: async ({ ctx }) => ({ data: 'b' as const, ctx }),
+//   },
+// });
+// const routerMerged = mergeRouters(routerA, routerB);
 
-routerMerged.queries.b;
+// routerMerged.queries.b;
