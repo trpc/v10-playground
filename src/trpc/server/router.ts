@@ -36,7 +36,7 @@ type mergeRouters<
 
 type mergeRoutersVariadic<Routers extends ProceduresByType<any>[]> =
   Routers extends []
-    ? ProceduresByType<any>
+    ? {}
     : Routers extends [infer First, ...infer Rest]
     ? First extends ProceduresByType<any>
       ? Rest extends ProceduresByType<any>[]
@@ -51,20 +51,21 @@ export function mergeRouters<TRouters extends ProceduresByType<any>[]>(
   throw new Error('Unimplemnted');
 }
 
-// type TestContext = {
-//   ok: true;
-// };
-// const routerA = createRouterWithContext<TestContext>()({
-//   queries: {
-//     a: async () => ({ data: 'a' as const }),
-//   },
-// });
+// FIXME delete these comments
+type TestContext = {
+  ok: true;
+};
+const routerA = createRouterWithContext<TestContext>()({
+  queries: {
+    a: async () => ({ data: 'a' as const }),
+  },
+});
 
-// const routerB = createRouterWithContext<TestContext>()({
-//   queries: {
-//     b: async ({ ctx }) => ({ data: 'b' as const, ctx }),
-//   },
-// });
-// const routerMerged = mergeRouters(routerA, routerB);
+const routerB = createRouterWithContext<TestContext>()({
+  queries: {
+    b: async ({ ctx }) => ({ data: 'b' as const, ctx }),
+  },
+});
+const routerMerged = mergeRouters(routerA, routerB);
 
-// routerMerged.queries.b
+routerMerged.queries.b;
