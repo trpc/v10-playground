@@ -1,9 +1,5 @@
-import {
-  MaybePromise,
-  MiddlewareFunction,
-  Params,
-  ProcedureResultError,
-} from '..';
+import { MaybePromise, Params, ProcedureResultError } from '..';
+import { Middleware, middlewareResult } from './core';
 
 type IsProcedureResultErrorLike<T> = T extends ProcedureResultError<any>
   ? T
@@ -19,7 +15,7 @@ export function createNewContext<TInputContext>() {
       { ctx: TNewContext } | IsProcedureResultErrorLike<TError>
     >,
   ) {
-    return function newContext<TInputParams extends {}>(): MiddlewareFunction<
+    return function newContext<TInputParams extends {}>(): Middleware<
       TInputParams,
       Omit<TInputParams, 'ctx'> & { ctx: NonNullable<TNewContext> },
       TError
@@ -33,7 +29,7 @@ export function createNewContext<TInputContext>() {
             ctx: result.ctx as NonNullable<TNewContext>,
           });
         }
-        return result;
+        return middlewareResult(result);
       };
     };
   };

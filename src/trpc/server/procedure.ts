@@ -1,18 +1,13 @@
+import { ExcludeErrorLike, inferProcedureArgs, OnlyErrorLike } from '.';
+import { Middleware } from './middlewares/core';
 import { TRPC_ERROR_CODE_KEY } from './rpc';
 
-const middlewareMarker = Symbol('middlewareMarker');
 const errorMarker = Symbol('errorMarker');
 ///////////// utils //////////////
 
 export type MaybePromise<T> = T | Promise<T>;
-/**
- * JSON-RPC 2.0 Error codes
- *
- * `-32000` to `-32099` are reserved for implementation-defined server-errors.
- * For tRPC we're copying the last digits of HTTP 4XX errors.
- */
-//////// response shapes //////////
 
+//////// response shapes //////////
 export interface ResultErrorData {
   code: TRPC_ERROR_CODE_KEY;
 }
@@ -22,74 +17,48 @@ export interface ProcedureResultError<
   readonly _error: typeof errorMarker;
   error: TResultErrorData;
 }
-///////// middleware implementation ///////////
-interface MiddlewareResultBase<TParams> {
-  /**
-   * All middlewares should pass through their `next()`'s output.
-   * Requiring this marker makes sure that can't be forgotten at compile-time.
-   */
-  readonly _middleware: typeof middlewareMarker;
-  TParams: TParams;
-}
-export interface MiddlewareOKResult<TParams>
-  extends MiddlewareResultBase<TParams> {}
-export interface MiddlewareErrorResult<TParams>
-  extends MiddlewareResultBase<TParams>,
-    ProcedureResultError<any> {}
-export type MiddlewareResult<TParams> =
-  | MiddlewareOKResult<TParams>
-  | MiddlewareErrorResult<TParams>;
-export type MiddlewareFunctionParams<TInputParams> = TInputParams & {
-  next: {
-    (): Promise<MiddlewareResult<TInputParams>>;
-    <T>(params: T): Promise<MiddlewareResult<T>>;
-  };
-};
-export type MiddlewareFunction<TInputParams, TNextParams, TResult = never> = (
-  params: MiddlewareFunctionParams<TInputParams>,
-) => Promise<MiddlewareResult<TNextParams> | TResult> | TResult;
+export type Resolver<TInputParams, TResult = never> = (
+  params: TInputParams,
+) => MaybePromise<TResult>;
 
 export interface Params<TContext> {
   ctx: TContext;
   rawInput?: unknown;
 }
-type ExcludeMiddlewareResult<T> = T extends MiddlewareResult<any> ? never : T;
-export type Procedure<TBaseParams, TResult> = (
-  params: TBaseParams,
-) => MaybePromise<TResult>;
-/**
- * @internal
- */
-export type ProcedureMeta<TParams> = {
-  /**
-   * @internal
-   */
-  _params: TParams;
-};
-export type ProcedureWithMeta<TBaseParams, TParams, TResult> = Procedure<
-  TBaseParams,
-  TResult
-> &
-  ProcedureMeta<TParams>;
+
+export interface ProcedureOKResult<T> {
+  ok: true;
+  data: T;
+  error?: undefined;
+}
+export interface ProcedureErrorResult<T> {
+  ok: false;
+  error: T;
+  data?: undefined;
+}
+
+export type ProcedureResult<T> =
+  | ProcedureOKResult<ExcludeErrorLike<T>>
+  | ProcedureErrorResult<OnlyErrorLike<T>['error']>;
+
+export type Procedure<_TBaseParams, TParams, TResult> = (
+  ...args: inferProcedureArgs<TParams>
+) => MaybePromise<ProcedureResult<TResult>>;
 
 export function pipedResolver<TContext>() {
   type TBaseParams = Params<TContext>;
 
   function middlewares<TResult>(
-    resolver: Procedure<TBaseParams, TResult>,
-  ): ProcedureWithMeta<TBaseParams, TBaseParams, TResult>;
+    resolver: Resolver<TBaseParams, TResult>,
+  ): Procedure<TBaseParams, TBaseParams, TResult>;
   function middlewares<
     TResult,
     MW1Params extends TBaseParams = TBaseParams,
     MW1Result = never,
   >(
-    middleware1: MiddlewareFunction<TBaseParams, MW1Params, MW1Result>,
-    resolver: Procedure<MW1Params, TResult>,
-  ): ProcedureWithMeta<
-    TBaseParams,
-    MW1Params,
-    ExcludeMiddlewareResult<TResult | MW1Result>
-  >;
+    middleware1: Middleware<TBaseParams, MW1Params, MW1Result>,
+    resolver: Resolver<MW1Params, TResult>,
+  ): Procedure<TBaseParams, MW1Params, TResult | MW1Result>;
   function middlewares<
     TResult,
     MW1Params extends TBaseParams = TBaseParams,
@@ -97,14 +66,10 @@ export function pipedResolver<TContext>() {
     MW2Params extends TBaseParams = MW1Params,
     MW2Result = never,
   >(
-    middleware1: MiddlewareFunction<TBaseParams, MW1Params, MW1Result>,
-    middleware2: MiddlewareFunction<MW1Params, MW2Params, MW2Result>,
-    resolver: Procedure<MW2Params, TResult>,
-  ): ProcedureWithMeta<
-    TBaseParams,
-    MW2Params,
-    ExcludeMiddlewareResult<TResult | MW1Result | MW2Result>
-  >;
+    middleware1: Middleware<TBaseParams, MW1Params, MW1Result>,
+    middleware2: Middleware<MW1Params, MW2Params, MW2Result>,
+    resolver: Resolver<MW2Params, TResult>,
+  ): Procedure<TBaseParams, MW2Params, TResult | MW1Result | MW2Result>;
   function middlewares(..._args: any): any {
     throw new Error('Unimplemented');
   }

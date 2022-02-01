@@ -7,8 +7,8 @@ import { inferProcedure, initTRPC } from './trpc/server';
 async function main() {
   {
     // query 'whoami'
-    const result = await appRouter.queries['viewer.whoami']({ ctx: {} });
-    if (typeof result === 'object' && 'error' in result) {
+    const result = await appRouter.queries['viewerWhoami']();
+    if (result.error) {
       expectTypeOf<typeof result['error']>().toMatchTypeOf<
         | {
             code: 'UNAUTHORIZED';
@@ -25,7 +25,7 @@ async function main() {
   }
   {
     // if you hover result we can see that we can infer both the result and every possible expected error
-    const result = await appRouter.queries.greeting({ ctx: {} });
+    const result = await appRouter.queries.greeting({ hello: 'there' });
     if ('error' in result && result.error) {
       if ('zod' in result.error) {
         // zod error inferred - useful for forms w/o libs
@@ -60,13 +60,18 @@ async function main() {
     const trpc = initTRPC();
     trpc.router({
       queries: {
-        test: () => {
+        test: trpc.resolver(() => {
           return 'ok';
-        },
+        }),
       },
       // @ts-expect-error should error
       doesNotExist: {},
     });
   }
+  {
+    const result = await appRouter.mutations['fireAndForget']('hey');
+    console.log(result);
+  }
 }
+
 main();

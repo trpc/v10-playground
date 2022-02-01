@@ -1,17 +1,13 @@
 import type { z } from 'zod';
-import {
-  error,
-  InputSchema,
-  MiddlewareFunction,
-  ProcedureResultError,
-} from '..';
+import { error, InputSchema, ProcedureResultError } from '..';
+import { Middleware, middlewareResult } from './core';
 
 /***
  * Utility for creating a zod middleware
  */
 export function zod<TInputParams, TSchema extends z.ZodTypeAny>(
   schema: TSchema,
-): MiddlewareFunction<
+): Middleware<
   TInputParams,
   TInputParams & InputSchema<z.input<TSchema>, z.output<TSchema>>,
   ProcedureResultError<{
@@ -36,10 +32,12 @@ export function zod<TInputParams, TSchema extends z.ZodTypeAny>(
     }
 
     const zod = (result as z.SafeParseError<zInput>).error.format();
-    const err = error({
-      code: 'BAD_REQUEST',
-      zod,
-    });
+    const err = middlewareResult(
+      error({
+        code: 'BAD_REQUEST',
+        zod,
+      }),
+    );
     return err;
   };
 }

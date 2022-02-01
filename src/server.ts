@@ -36,12 +36,12 @@ let postsDb = [
 /////////// app root router //////////
 export const appRouter = trpc.router({
   queries: {
-    // simple procedure without args avialable at `post.all`
-    'post.all': (_params) => {
+    // simple procedure without args avialable at postAll`
+    postList: trpc.resolver((_params) => {
       return postsDb;
-    },
+    }),
     // get post by id or 404 if it's not found
-    'post.byId': trpc.resolver(
+    postById: trpc.resolver(
       trpc.zod(
         z.object({
           id: z.string(),
@@ -76,7 +76,7 @@ export const appRouter = trpc.router({
       },
     ),
     // procedure with auth
-    'viewer.whoami': trpc.resolver(
+    viewerWhoami: trpc.resolver(
       // `isAuthed()` will propagate new `ctx`
       isAuthed(),
       ({ ctx }) => {
@@ -84,10 +84,17 @@ export const appRouter = trpc.router({
         return `your id is ${ctx.user.id}`;
       },
     ),
+    // a bit iffy - if you want to use it without `trpc.resolver()`
+    aQueryWithoutResolverWrapper: () => {
+      return {
+        ok: true,
+        data: 'test',
+      };
+    },
   },
   mutations: {
     // mutation with auth + input
-    'post.add': trpc.resolver(
+    postAdd: trpc.resolver(
       trpc.zod(
         z.object({
           title: z.string(),
@@ -105,6 +112,14 @@ export const appRouter = trpc.router({
         return {
           data: post,
         };
+      },
+    ),
+    // mutation without a return type
+    fireAndForget: trpc.resolver(
+      //
+      trpc.zod(z.string()),
+      () => {
+        // no return
       },
     ),
   },
