@@ -65,16 +65,12 @@ const imports = new Array(NUM_ROUTERS)
   .fill('')
   .map((_, index) => `import { router${index} } from './router${index}';`)
   .join('\n');
-let indexFile = `
-import { trpc } from '../context';
-${imports}
-
-export const appRouter = trpc.mergeRouters(
-${new Array(NUM_ROUTERS)
+const content = new Array(NUM_ROUTERS)
   .fill('')
-  .map((_, index) => `router${index}`)
-  .join(',\n')}
-) 
-`.trim();
+  .map((_, index) => `...router${index}.queries,`)
+  .join('\n');
+let indexFile = WRAPPER.replace('__IMPORTS__', imports)
+  .replace('__ROUTER_NAME__', `appRouter`)
+  .replace('__CONTENT__', content);
 
 fs.writeFileSync(SERVER_DIR + '/_app.ts', indexFile);
