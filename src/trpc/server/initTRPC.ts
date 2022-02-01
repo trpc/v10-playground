@@ -3,6 +3,7 @@ import {
   createNewContext,
   pipedResolver,
   zod,
+  mergeRouters,
 } from '.';
 
 export function initTRPC<TContext>() {
@@ -23,5 +24,6 @@ export function initTRPC<TContext>() {
      * Zod middlware
      */
     zod,
+    mergeRouters,
   };
 }
