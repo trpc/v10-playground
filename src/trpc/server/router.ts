@@ -24,27 +24,28 @@ export function createRouterWithContext<TContext>() {
     return procedures as any;
   };
 }
-type PrefixedRouters<TContext> = Record<string, ProceduresByType<TContext>>;
 
-type PrefixRouters<
-  T extends PrefixedRouters<any>,
-  TDelimiter extends string = '',
+type mergeRouters<
+  A extends ProceduresByType<any>,
+  B extends ProceduresByType<any>,
 > = {
-  queries: {
-    [TPath in keyof T as `${TPath &
-      string}${TDelimiter}${keyof T[TPath]['queries'] &
-      string}`]: T[TPath]['queries'];
-  };
-  mutations: {
-    [TPath in keyof T as `${TPath &
-      string}${TDelimiter}${keyof T[TPath]['mutations'] &
-      string}`]: T[TPath]['mutations'];
-  };
+  queries: A['queries'] & B['queries'];
+  mutations: A['mutations'] & B['mutations'];
 };
-export function mergeRouters<
-  T extends PrefixedRouters<TContext>,
-  TContext,
-  TDelimiter extends string = '',
->(_routers: T, _delimiter?: TDelimiter): PrefixRouters<T, TDelimiter> {
-  throw new Error('Unimplemente');
+
+type mergeRoutersVariadic<Routers extends ProceduresByType<any>[]> =
+  Routers extends []
+    ? ProceduresByType<any>
+    : Routers extends [infer First, ...infer Rest]
+    ? First extends ProceduresByType<any>
+      ? Rest extends ProceduresByType<any>[]
+        ? mergeRouters<First, mergeRoutersVariadic<Rest>>
+        : never
+      : never
+    : never;
+
+export function mergeRouters<TRouters extends ProceduresByType<any>[]>(
+  ..._routers: TRouters
+): mergeRoutersVariadic<TRouters> {
+  throw new Error('Unimplemnted');
 }
