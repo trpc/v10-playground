@@ -14,6 +14,7 @@ export type Procedure<TInput, TOutput> = TInput extends undefined
   ? (input?: TInput) => Promise<TOutput>
   : (input: TInput) => Promise<TOutput>;
 
+type Overwrite<T, U> = Omit<T, keyof U> & U;
 export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
   input<$TInput, $TParsedInput>(
     schema: ParserWithInputOutput<$TInput, $TParsedInput>,
@@ -29,7 +30,7 @@ export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
   middleware<$MiddlewareFn extends MiddlewareFunction<TContext, any>>(
     fn: $MiddlewareFn,
   ): ProcedureReturnInput<
-    inferMiddlewareContext<$MiddlewareFn>,
+    Overwrite<TContext, inferMiddlewareContext<$MiddlewareFn>>,
     TInput,
     TParsedInput,
     TOutput
@@ -56,8 +57,6 @@ function procedure(): ProcedureReturnInput<
 > {
   throw new Error('unimplemented');
 }
-
-type Overwrite<T, U> = Omit<T, keyof U> & U;
 
 type Context = {
   req?: string;
@@ -109,7 +108,7 @@ const fn = procedure()
   .resolve((opts) => {
     console.log(opts.ctx);
     console.log(opts.ctx.user.id); // yay
-    console.log(opts.ctx.test); // <-- but this doesn't work :(
+    console.log(opts.ctx.test); // <-- yay
     return {
       foo: 'bar',
     };
