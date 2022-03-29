@@ -18,7 +18,7 @@ export type ParserCustomValidatorEsque<TInput> = (
 export type ParserYupEsque<TInput> = {
   validateSync: (input: unknown) => TInput;
 };
-export type Parser<TInput> =
+export type ParserWithoutInput<TInput> =
   | ParserYupEsque<TInput>
   | ParserSuperstructEsque<TInput>
   | ParserCustomValidatorEsque<TInput>
@@ -28,3 +28,18 @@ export type ParserWithInputOutput<TInput, TParsedInput> = ParserZodEsque<
   TInput,
   TParsedInput
 >;
+
+export type Parser = ParserWithoutInput<any> | ParserWithInputOutput<any, any>;
+
+export type inferParser<TParser extends Parser> =
+  TParser extends ParserWithInputOutput<infer $TIn, infer $TOut>
+    ? {
+        in: $TIn;
+        out: $TOut;
+      }
+    : TParser extends ParserWithoutInput<infer $InOut>
+    ? {
+        in: $InOut;
+        out: $InOut;
+      }
+    : never;

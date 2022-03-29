@@ -1,6 +1,12 @@
 import { z } from 'zod';
 import { inferMiddlewareContext, MiddlewareFunction } from './middlewares';
-import { Parser, ParserWithInputOutput } from './parsers';
+import {
+  ParserWithoutInput,
+  ParserWithInputOutput,
+  Parser,
+  inferParser,
+} from './parsers';
+import { Overwrite } from './utils';
 
 // type ProcedureBuilder
 type MaybePromise<T> = T | Promise<T>;
@@ -10,11 +16,10 @@ interface ResolveOptions<TContext, TInput> {
 }
 export type ProcedureType = 'query' | 'mutation' | 'subscription';
 
-export type Procedure<TInput, TOutput> = TInput extends undefined
+export type Procedure<_TContext, TInput, TOutput> = TInput extends undefined
   ? (input?: TInput) => Promise<TOutput>
   : (input: TInput) => Promise<TOutput>;
 
-type Overwrite<T, U> = Omit<T, keyof U> & U;
 export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
   input<$TInput, $TParsedInput>(
     schema: ParserWithInputOutput<$TInput, $TParsedInput>,
@@ -22,12 +27,20 @@ export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
     ProcedureReturnInput<TContext, $TInput, $TParsedInput, TOutput>,
     'input'
   >;
-  input<$TInput>(
-    schema: Parser<$TInput>,
-  ): Omit<ProcedureReturnInput<TContext, $TInput, $TInput, TOutput>, 'input'>;
+  input<$TParser extends Parser>(
+    schema: $TParser,
+  ): Omit<
+    ProcedureReturnInput<
+      TContext,
+      inferParser<$TParser>['in'],
+      inferParser<$TParser>['out'],
+      TOutput
+    >,
+    'input'
+  >;
 
   // middleware<$MiddlewareFn extends MiddlewareFunction<TContext>>()
-  middleware<$MiddlewareFn extends MiddlewareFunction<TContext, any>>(
+  use<$MiddlewareFn extends MiddlewareFunction<TContext, any>>(
     fn: $MiddlewareFn,
   ): ProcedureReturnInput<
     Overwrite<TContext, inferMiddlewareContext<$MiddlewareFn>>,
@@ -40,22 +53,19 @@ export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
       opts: ResolveOptions<TContext, TParsedInput>,
     ) => MaybePromise<$TOutput>,
   ): TOutput extends unknown
-    ? Procedure<TInput, $TOutput>
-    : Procedure<TInput, TOutput>;
+    ? Procedure<TContext, TInput, $TOutput>
+    : Procedure<TContext, TInput, TOutput>;
 }
 
-function procedure(): ProcedureReturnInput<
-  {
-    user?: {
-      id: string;
-    };
-    '...': 'bla';
-  },
-  undefined,
-  undefined,
-  undefined
-> {
-  throw new Error('unimplemented');
+export function createProcedureFactory<TContext>() {
+  return function createProcedure(): ProcedureReturnInput<
+    TContext,
+    undefined,
+    undefined,
+    undefined
+  > {
+    throw new Error('unimplemented');
+  };
 }
 
 type Context = {
@@ -88,34 +98,3 @@ const isAuthed = createMiddleware((opts) => {
     },
   });
 });
-// TODO: how to make reusable middlewares
-const fn = procedure()
-  .input(
-    z.object({
-      id: z.string(),
-    }),
-  )
-  .middleware(async (opts) => {
-    const res = await opts.next({
-      ctx: {
-        ...opts.ctx,
-        test: 'hello',
-      },
-    });
-    return res;
-  })
-  .middleware(isAuthed)
-  .resolve((opts) => {
-    console.log(opts.ctx);
-    console.log(opts.ctx.user.id); // yay
-    console.log(opts.ctx.test); // <-- yay
-    return {
-      foo: 'bar',
-    };
-  });
-// Usage
-
-// trpc
-//   .procedure()
-//   .input(z.object())
-//   .output()

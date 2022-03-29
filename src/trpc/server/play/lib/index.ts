@@ -1,0 +1,1 @@
+export { initTRPC } from './initTRPC';

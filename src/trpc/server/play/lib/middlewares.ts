@@ -53,3 +53,11 @@ export type inferMiddlewareContext<
 > = TMiddleware extends MiddlewareFunction<any, infer $TContext>
   ? $TContext
   : never;
+
+export function createMiddlewareFactory<TContext>() {
+  return function createMiddleware<$TNewContext>(
+    fn: MiddlewareFunction<TContext, $TNewContext>,
+  ) {
+    return fn;
+  };
+}
