@@ -1,5 +1,7 @@
+import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import { initTRPC } from './lib';
+import { inferMiddlewareParams } from './lib/middleware';
 
 ////////// app bootstrap & middlewares ////////
 type Context = {
@@ -49,6 +51,7 @@ function isPartOfOrg<
     return params.next({
       input,
       ctx: {
+        ...ctx,
         input,
         user,
       },
@@ -111,6 +114,17 @@ export const appRouter = trpc.router({
       // `ctx.user` is now `NonNullable`
       return `your id is ${ctx.user.id}`;
     }),
+    tetete: proc
+      .use((params) => {
+        return params.next({
+          input: 'input' as const,
+          ctx: 'ctx' as const,
+        });
+      })
+      .resolve(({ input, ctx }) => {
+        expectTypeOf(ctx).toMatchTypeOf<'ctx'>();
+        expectTypeOf(input).toMatchTypeOf<'input'>();
+      }),
   },
 
   mutations: {
@@ -149,7 +163,9 @@ export const appRouter = trpc.router({
         ),
       )
       .resolve(({ ctx, input }) => {
+        console.log(input); // <--------- todo
         console.log(ctx.input, ctx);
+        console.log(ctx.user.id);
       }),
   },
 });

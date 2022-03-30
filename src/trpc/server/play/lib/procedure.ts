@@ -34,10 +34,15 @@ export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
   >;
 
   // middleware<$MiddlewareFn extends MiddlewareFunction<TContext>>()
-  use<$MiddlewareFn extends MiddlewareFunction<{ ctx: TContext }, any>>(
+  use<
+    $MiddlewareFn extends MiddlewareFunction<
+      { ctx: TContext; input: any },
+      any
+    >,
+  >(
     fn: $MiddlewareFn,
   ): ProcedureReturnInput<
-    Overwrite<TContext, inferMiddlewareParams<$MiddlewareFn>['ctx']>,
+    inferMiddlewareParams<$MiddlewareFn>['ctx'],
     inferMiddlewareParams<$MiddlewareFn>['input'],
     TParsedInput,
     TOutput
