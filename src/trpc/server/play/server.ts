@@ -59,6 +59,8 @@ function isPartOfOrg<
   });
 }
 
+type TTest = inferMiddlewareParams<ReturnType<typeof isPartOfOrg>>;
+
 // mock db
 let postsDb = [
   {

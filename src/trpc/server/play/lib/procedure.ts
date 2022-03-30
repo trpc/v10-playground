@@ -1,6 +1,5 @@
-import { inferMiddlewareParams, MiddlewareFunction } from './middleware';
+import { MiddlewareFunction, Params } from './middleware';
 import { ParserWithInputOutput, Parser, inferParser } from './parser';
-import { Overwrite } from './utils';
 
 // type ProcedureBuilder
 type MaybePromise<T> = T | Promise<T>;
@@ -34,16 +33,17 @@ export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
   >;
 
   // middleware<$MiddlewareFn extends MiddlewareFunction<TContext>>()
-  use<
-    $MiddlewareFn extends MiddlewareFunction<
-      { ctx: TContext; input: any },
-      any
+  use<$TParams extends Params>(
+    fn: MiddlewareFunction<
+      {
+        ctx: TContext;
+        input: TInput;
+      },
+      $TParams
     >,
-  >(
-    fn: $MiddlewareFn,
   ): ProcedureReturnInput<
-    inferMiddlewareParams<$MiddlewareFn>['ctx'],
-    inferMiddlewareParams<$MiddlewareFn>['input'],
+    $TParams['ctx'],
+    $TParams['input'],
     TParsedInput,
     TOutput
   >;
