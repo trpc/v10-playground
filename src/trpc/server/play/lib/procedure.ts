@@ -1,11 +1,5 @@
-import { z } from 'zod';
-import { inferMiddlewareContext, MiddlewareFunction } from './middlewares';
-import {
-  ParserWithoutInput,
-  ParserWithInputOutput,
-  Parser,
-  inferParser,
-} from './parsers';
+import { inferMiddlewareParams, MiddlewareFunction } from './middleware';
+import { ParserWithInputOutput, Parser, inferParser } from './parser';
 import { Overwrite } from './utils';
 
 // type ProcedureBuilder
@@ -40,10 +34,10 @@ export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
   >;
 
   // middleware<$MiddlewareFn extends MiddlewareFunction<TContext>>()
-  use<$MiddlewareFn extends MiddlewareFunction<TContext, any>>(
+  use<$MiddlewareFn extends MiddlewareFunction<{ ctx: TContext }, any>>(
     fn: $MiddlewareFn,
   ): ProcedureReturnInput<
-    Overwrite<TContext, inferMiddlewareContext<$MiddlewareFn>>,
+    Overwrite<TContext, inferMiddlewareParams<$MiddlewareFn>['ctx']>,
     TInput,
     TParsedInput,
     TOutput
@@ -67,34 +61,3 @@ export function createProcedureFactory<TContext>() {
     throw new Error('unimplemented');
   };
 }
-
-type Context = {
-  req?: string;
-  user?: {
-    id: string;
-  };
-};
-
-function createMiddlewareFactory<TContext>() {
-  return function newContextFactory<
-    TInputContext extends TContext,
-    TNewContext,
-  >(middleware: MiddlewareFunction<TInputContext, TNewContext>) {
-    return middleware;
-  };
-}
-
-const createMiddleware = createMiddlewareFactory<Context>();
-
-// This is a non-working attempt:
-const isAuthed = createMiddleware((opts) => {
-  if (!opts.ctx.user) {
-    throw new Error('Unauthed');
-  }
-  return opts.next({
-    ctx: {
-      ...opts.ctx,
-      user: opts.ctx.user,
-    },
-  });
-});

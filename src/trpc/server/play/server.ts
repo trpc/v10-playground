@@ -47,8 +47,9 @@ function isPartOfOrg<
     }
 
     return params.next({
+      input,
       ctx: {
-        input: result.data,
+        input,
         user,
       },
     });
@@ -65,14 +66,14 @@ let postsDb = [
   },
 ];
 
+const proc = trpc.procedure;
 /////////// app root router //////////
 export const appRouter = trpc.router({
   queries: {
     // simple procedure without args avialable at postAll`
-    postList: trpc.procedure().resolve((params) => postsDb),
+    postList: proc.resolve((params) => postsDb),
     // get post by id or 404 if it's not found
-    postById: trpc
-      .procedure()
+    postById: proc
       .input(
         z.object({
           id: z.string(),
@@ -88,8 +89,7 @@ export const appRouter = trpc.router({
         };
       }),
     // procedure with input validation called `greeting`
-    greeting: trpc
-      .procedure()
+    greeting: proc
       .input(
         z.object({
           hello: z.string(),
@@ -106,20 +106,16 @@ export const appRouter = trpc.router({
         };
       }),
     // procedure with auth
-    viewerWhoAmi: trpc
-      .procedure()
-      .use(isAuthed)
-      .resolve(({ ctx }) => {
-        // `isAuthed()` will propagate new `ctx`
-        // `ctx.user` is now `NonNullable`
-        return `your id is ${ctx.user.id}`;
-      }),
+    viewerWhoAmi: proc.use(isAuthed).resolve(({ ctx }) => {
+      // `isAuthed()` will propagate new `ctx`
+      // `ctx.user` is now `NonNullable`
+      return `your id is ${ctx.user.id}`;
+    }),
   },
 
   mutations: {
     // mutation with auth + input
-    postAdd: trpc
-      .procedure()
+    postAdd: proc
       .input(
         z.object({
           title: z.string(),
@@ -138,14 +134,10 @@ export const appRouter = trpc.router({
           data: post,
         };
       }),
-    fireAndForget: trpc
-      .procedure()
-      .input(z.string())
-      .resolve(() => {
-        // no return
-      }),
-    editOrg: trpc
-      .procedure()
+    fireAndForget: proc.input(z.string()).resolve(() => {
+      // no return
+    }),
+    editOrg: proc
       .use(
         isPartOfOrg(
           z.object({
@@ -156,7 +148,7 @@ export const appRouter = trpc.router({
           }),
         ),
       )
-      .resolve(({ ctx }) => {
+      .resolve(({ ctx, input }) => {
         console.log(ctx.input, ctx);
       }),
   },
