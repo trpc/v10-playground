@@ -37,7 +37,7 @@ function isPartOfOrg<
     if (!result.success) {
       throw new Error('BAD_INPUT');
     }
-    const input = result.data;
+    const input = result.data as TSchema['_output'];
     if (
       user.memberships.some(
         (membership) => membership.organizationId !== input.organizationId,
@@ -71,7 +71,7 @@ const proc = trpc.procedure;
 export const appRouter = trpc.router({
   queries: {
     // simple procedure without args avialable at postAll`
-    postList: proc.resolve((params) => postsDb),
+    postList: async () => postsDb,
     // get post by id or 404 if it's not found
     postById: proc
       .input(

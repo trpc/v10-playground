@@ -25,8 +25,8 @@ export type MiddlewareResult<TParams extends Params> =
   | MiddlewareOKResult<TParams>
   | MiddlewareErrorResult<TParams>;
 
-export interface Params {
-  ctx?: unknown;
+export interface Params<TContext = unknown> {
+  ctx: TContext;
   input?: unknown;
 }
 export interface MiddlewareOptions<TParams extends Params> {
@@ -52,7 +52,12 @@ export type MiddlewareFunction<
   rawInput: unknown;
   next: {
     (): Promise<MiddlewareResult<TParams>>;
-    <$TParams>(opts: $TParams): Promise<MiddlewareResult<$TParams>>;
+    <$TParams extends Params>(opts: $TParams): Promise<
+      MiddlewareResult<$TParams>
+    >;
+    <$TParams extends Params>(opts: $TParams): Promise<
+      MiddlewareResult<$TParams>
+    >;
   };
 }) => Promise<MiddlewareResult<TParamsAfter>>;
 

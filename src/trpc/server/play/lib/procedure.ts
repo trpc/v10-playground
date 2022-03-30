@@ -38,7 +38,7 @@ export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
     fn: $MiddlewareFn,
   ): ProcedureReturnInput<
     Overwrite<TContext, inferMiddlewareParams<$MiddlewareFn>['ctx']>,
-    TInput,
+    inferMiddlewareParams<$MiddlewareFn>['input'],
     TParsedInput,
     TOutput
   >;
