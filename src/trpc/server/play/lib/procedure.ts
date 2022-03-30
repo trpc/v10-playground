@@ -44,7 +44,7 @@ export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
   ): ProcedureReturnInput<
     $TParams['ctx'],
     $TParams['input'],
-    TParsedInput,
+    $TParams['input'],
     TOutput
   >;
   resolve<$TOutput>(
