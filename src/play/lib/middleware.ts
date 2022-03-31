@@ -31,8 +31,12 @@ export interface Params<
   TContext = unknown,
   TInputIn = unknown,
   TInputOut = unknown,
+  TOutputIn = unknown,
+  TOutputOut = unknown,
 > {
   ctx: TContext;
+  _output_in: TOutputIn;
+  _output_out: TOutputOut;
   _input_in: TInputIn;
   input: TInputOut;
 }
@@ -53,6 +57,8 @@ export type MiddlewareFunction<
         ctx: $TContext;
         input: TParams['input'];
         _input_in: TParams['_input_in'];
+        _output_in: TParams['_output_in'];
+        _output_out: TParams['_output_out'];
       }>
     >;
   };
@@ -67,7 +73,13 @@ export type inferMiddlewareParams<
 export function createMiddlewareFactory<TContext>() {
   return function createMiddleware<$TNewParams extends Params>(
     fn: MiddlewareFunction<
-      { ctx: TContext; input: unknown; _input_in: unknown },
+      {
+        ctx: TContext;
+        input: unknown;
+        _input_in: unknown;
+        _output_in: unknown;
+        _output_out: unknown;
+      },
       $TNewParams
     >,
   ) {

@@ -162,6 +162,24 @@ export const appRouter = trpc.router({
         console.log(ctx.foo.bar);
 
         console.log(ctx.user.id);
+        return input;
       }),
+    updateToken: proc
+      .input(z.string())
+      .output(z.literal('ok'))
+      // @ts-expect-error output validation
+      .resolve(({ input }) => {
+        return input;
+      }),
+  },
+});
+
+// some testing
+// TODO delete me
+const output = appRouter.mutations.editOrg({
+  organizationId: '123',
+  data: {
+    name: 'asd',
+    len: 'asdasd',
   },
 });
