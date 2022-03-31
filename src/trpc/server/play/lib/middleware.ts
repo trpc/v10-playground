@@ -10,12 +10,14 @@ interface MiddlewareResultBase<TParams extends Params> {
   ctx: TParams['ctx'];
 }
 
-interface MiddlewareOKResult<TParams> extends MiddlewareResultBase<TParams> {
+interface MiddlewareOKResult<TParams extends Params>
+  extends MiddlewareResultBase<TParams> {
   ok: true;
   data: unknown;
   // this could be extended with `input`/`rawInput` later
 }
-interface MiddlewareErrorResult<TParams> extends MiddlewareResultBase<TParams> {
+interface MiddlewareErrorResult<TParams extends Params>
+  extends MiddlewareResultBase<TParams> {
   ok: false;
   error: Error;
   // we could guarantee it's always of this type
@@ -25,21 +27,14 @@ export type MiddlewareResult<TParams extends Params> =
   | MiddlewareOKResult<TParams>
   | MiddlewareErrorResult<TParams>;
 
-export interface Params<TContext = unknown> {
+export interface Params<
+  TContext = unknown,
+  TInputIn = unknown,
+  TInputOut = unknown,
+> {
   ctx: TContext;
-  input?: unknown;
-}
-export interface MiddlewareOptions<TParams extends Params> {
-  ctx: TParams['ctx'];
-  type: ProcedureType;
-  path: string;
-  rawInput: unknown;
-  next: {
-    (): Promise<MiddlewareResult<TParams>>;
-    <$TParams extends Params>(opts: $TParams): Promise<
-      MiddlewareResult<$TParams>
-    >;
-  };
+  _input_in: TInputIn;
+  input: TInputOut;
 }
 
 export type MiddlewareFunction<
@@ -49,14 +44,37 @@ export type MiddlewareFunction<
   ctx: TParams['ctx'];
   type: ProcedureType;
   path: string;
+  input: TParams['input'];
   rawInput: unknown;
   next: {
     (): Promise<MiddlewareResult<TParams>>;
-    <$TParams extends Params>(opts: $TParams): Promise<
-      MiddlewareResult<$TParams>
+    <$TContext>(opts: { ctx: $TContext }): Promise<
+      MiddlewareResult<{
+        ctx: $TContext;
+        input: TParams['input'];
+        _input_in: TParams['_input_in'];
+      }>
     >;
-    <$TParams extends Params>(opts: $TParams): Promise<
-      MiddlewareResult<$TParams>
+    <$TInputIn, $InputOut>(opts: {
+      _input_in: $TInputIn;
+      input: $InputOut;
+    }): Promise<
+      MiddlewareResult<{
+        _input_in: $TInputIn;
+        input: $InputOut;
+        ctx: TParams['ctx'];
+      }>
+    >;
+    <$TContext, $TInputIn, $TInputOut>(opts: {
+      _input_in: $TInputIn;
+      input: $TInputOut;
+      ctx: $TContext;
+    }): Promise<
+      MiddlewareResult<{
+        _input_in: $TInputIn;
+        ctx: $TContext;
+        input: $TInputOut;
+      }>
     >;
   };
 }) => Promise<MiddlewareResult<TParamsAfter>>;
@@ -69,7 +87,10 @@ export type inferMiddlewareParams<
 
 export function createMiddlewareFactory<TContext>() {
   return function createMiddleware<$TNewParams extends Params>(
-    fn: MiddlewareFunction<{ ctx: TContext }, $TNewParams>,
+    fn: MiddlewareFunction<
+      { ctx: TContext; input: unknown; _input_in: unknown },
+      $TNewParams
+    >,
   ) {
     return fn;
   };

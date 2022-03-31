@@ -1,4 +1,4 @@
-import { inferMiddlewareParams, MiddlewareFunction } from './middleware';
+import { MiddlewareFunction, Params } from './middleware';
 import { ParserWithInputOutput, Parser, inferParser } from './parser';
 import { Overwrite } from './utils';
 
@@ -14,41 +14,58 @@ export type Procedure<_TContext, TInput, TOutput> = TInput extends undefined
   ? (input?: TInput) => Promise<TOutput>
   : (input: TInput) => Promise<TOutput>;
 
-export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
-  input<$TInput, $TParsedInput>(
-    schema: ParserWithInputOutput<$TInput, $TParsedInput>,
-  ): Omit<
-    ProcedureReturnInput<TContext, $TInput, $TParsedInput, TOutput>,
-    'input'
-  >;
+export interface ProcedureReturnInput<TContext, TInputIn, TInputOut, TOutput> {
   input<$TParser extends Parser>(
     schema: $TParser,
-  ): Omit<
-    ProcedureReturnInput<
-      TContext,
-      inferParser<$TParser>['in'],
-      inferParser<$TParser>['out'],
-      TOutput
-    >,
-    'input'
-  >;
-
-  // middleware<$MiddlewareFn extends MiddlewareFunction<TContext>>()
-  use<$MiddlewareFn extends MiddlewareFunction<{ ctx: TContext }, any>>(
-    fn: $MiddlewareFn,
   ): ProcedureReturnInput<
-    Overwrite<TContext, inferMiddlewareParams<$MiddlewareFn>['ctx']>,
-    inferMiddlewareParams<$MiddlewareFn>['input'],
-    TParsedInput,
+    TContext,
+    inferParser<$TParser>['in'],
+    inferParser<$TParser>['out'],
     TOutput
   >;
+  use<$TParams extends Params>(
+    fn: MiddlewareFunction<
+      {
+        ctx: TContext;
+        input: TInputOut;
+        _input_in: TInputIn;
+      },
+      $TParams
+    >,
+  ): ProcedureReturnInput<
+    undefined extends $TParams['ctx'] ? TContext : $TParams['ctx'],
+    undefined extends $TParams['_input_in'] ? TInputIn : $TParams['_input_in'],
+    undefined extends $TParams['input'] ? TInputOut : $TParams['input'],
+    TOutput
+  >;
+  apply<
+    $ProcedureReturnInput extends Partial<
+      ProcedureReturnInput<any, any, any, any>
+    >,
+  >(
+    proc: $ProcedureReturnInput,
+  ): $ProcedureReturnInput extends Partial<
+    ProcedureReturnInput<
+      infer $TContext,
+      infer $TInputIn,
+      infer $TInputOut,
+      infer $TOutput
+    >
+  >
+    ? ProcedureReturnInput<
+        Overwrite<TContext, $TContext>,
+        $TInputIn,
+        $TInputOut,
+        $TOutput
+      >
+    : never;
   resolve<$TOutput>(
     resolver: (
-      opts: ResolveOptions<TContext, TParsedInput>,
+      opts: ResolveOptions<TContext, TInputOut>,
     ) => MaybePromise<$TOutput>,
   ): TOutput extends unknown
-    ? Procedure<TContext, TInput, $TOutput>
-    : Procedure<TContext, TInput, TOutput>;
+    ? Procedure<TContext, TInputOut, $TOutput>
+    : Procedure<TContext, TInputOut, TOutput>;
 }
 
 export function createProcedureFactory<TContext>() {

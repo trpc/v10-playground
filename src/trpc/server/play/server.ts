@@ -1,5 +1,7 @@
+import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import { initTRPC } from './lib';
+import { inferMiddlewareParams } from './lib/middleware';
 
 ////////// app bootstrap & middlewares ////////
 type Context = {
@@ -24,38 +26,6 @@ const isAuthed = trpc.middleware((params) => {
   });
 });
 
-function isPartOfOrg<
-  TSchema extends z.ZodObject<{ organizationId: z.ZodString }>,
->(schema: TSchema) {
-  return trpc.middleware(async (params) => {
-    const { ctx, rawInput } = params;
-    const { user } = ctx;
-    if (!user) {
-      throw new Error('UNAUTHORIZED');
-    }
-    const result = await schema.safeParseAsync(rawInput);
-    if (!result.success) {
-      throw new Error('BAD_INPUT');
-    }
-    const input = result.data as TSchema['_output'];
-    if (
-      user.memberships.some(
-        (membership) => membership.organizationId !== input.organizationId,
-      )
-    ) {
-      throw new Error('FORBIDDEN');
-    }
-
-    return params.next({
-      input,
-      ctx: {
-        input,
-        user,
-      },
-    });
-  });
-}
-
 // mock db
 let postsDb = [
   {
@@ -67,6 +37,34 @@ let postsDb = [
 ];
 
 const proc = trpc.procedure;
+
+function isPartOfOrg2<
+  TSchema extends z.ZodObject<{ organizationId: z.ZodString }>,
+>(schema: TSchema) {
+  return proc.input(schema).use((params) => {
+    const { ctx, input } = params;
+    const { user } = ctx;
+    if (!user) {
+      throw new Error('UNAUTHORIZED');
+    }
+
+    if (
+      user.memberships.some(
+        (membership) => membership.organizationId !== input.organizationId,
+      )
+    ) {
+      throw new Error('FORBIDDEN');
+    }
+
+    return params.next({
+      ctx: {
+        ...ctx,
+        user,
+      },
+    });
+  });
+}
+
 /////////// app root router //////////
 export const appRouter = trpc.router({
   queries: {
@@ -111,6 +109,18 @@ export const appRouter = trpc.router({
       // `ctx.user` is now `NonNullable`
       return `your id is ${ctx.user.id}`;
     }),
+    tetete: proc
+      .use((params) => {
+        return params.next({
+          _input_in: '_input_in' as const,
+          input: 'input' as const,
+          ctx: 'ctx' as const,
+        });
+      })
+      .resolve(({ input, ctx }) => {
+        expectTypeOf(ctx).toMatchTypeOf<'ctx'>();
+        expectTypeOf(input).toMatchTypeOf<'input'>();
+      }),
   },
 
   mutations: {
@@ -138,18 +148,36 @@ export const appRouter = trpc.router({
       // no return
     }),
     editOrg: proc
-      .use(
-        isPartOfOrg(
+      .input(
+        z.object({
+          organizationId: z.string(),
+          data: z.object({
+            name: z.string(),
+            len: z.string().transform((v) => v.length),
+          }),
+        }),
+      )
+      .resolve(({ ctx, input }) => {
+        console.log(input);
+
+        console.log(ctx, ctx);
+      }),
+    editOrg2: proc
+      .apply(
+        isPartOfOrg2(
           z.object({
             organizationId: z.string(),
             data: z.object({
               name: z.string(),
+              len: z.string().transform((v) => v.length),
             }),
           }),
         ),
       )
       .resolve(({ ctx, input }) => {
-        console.log(ctx.input, ctx);
+        console.log(input.data.len);
+
+        console.log(ctx.user.id);
       }),
   },
 });
