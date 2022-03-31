@@ -45,7 +45,7 @@ export interface ProcedureReturnInput<TParams extends Params> {
     resolver: (
       opts: ResolveOptions<TParams['ctx'], TParams['input']>,
     ) => MaybePromise<$TOutput>,
-  ): Procedure<TParams['ctx'], TParams['input'], $TOutput>;
+  ): Procedure<TParams['ctx'], TParams['_input_in'], $TOutput>;
 }
 
 export function createProcedureFactory<TContext>() {
