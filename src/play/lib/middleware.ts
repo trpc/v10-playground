@@ -55,27 +55,6 @@ export type MiddlewareFunction<
         _input_in: TParams['_input_in'];
       }>
     >;
-    <$TInputIn, $InputOut>(opts: {
-      _input_in: $TInputIn;
-      input: $InputOut;
-    }): Promise<
-      MiddlewareResult<{
-        _input_in: $TInputIn;
-        input: $InputOut;
-        ctx: TParams['ctx'];
-      }>
-    >;
-    <$TContext, $TInputIn, $TInputOut>(opts: {
-      _input_in: $TInputIn;
-      input: $TInputOut;
-      ctx: $TContext;
-    }): Promise<
-      MiddlewareResult<{
-        _input_in: $TInputIn;
-        ctx: $TContext;
-        input: $TInputOut;
-      }>
-    >;
   };
 }) => Promise<MiddlewareResult<TParamsAfter>>;
 
