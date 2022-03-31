@@ -1,5 +1,5 @@
 import { ProcedureType } from './procedure';
-import { MiddlewareMarker, UnsetMarker } from './utils';
+import { MiddlewareMarker } from './utils';
 
 interface MiddlewareResultBase<TParams extends Params> {
   /**

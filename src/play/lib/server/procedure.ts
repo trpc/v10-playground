@@ -10,7 +10,7 @@ interface ResolveOptions<TContext, TInput> {
 }
 export type ProcedureType = 'query' | 'mutation' | 'subscription';
 
-export type Procedure<TInput, TOutput> = TInput extends UnsetMarker
+export type Procedure<_TContext, TInput, TOutput> = TInput extends UnsetMarker
   ? (input?: undefined) => Promise<TOutput>
   : TInput extends undefined
   ? (input?: TInput) => Promise<TOutput>
@@ -59,6 +59,7 @@ export interface ProcedureBuilder<TParams extends Params> {
       opts: ResolveOptions<TParams['ctx'], TParams['_input_out']>,
     ) => MaybePromise<FallbackValue<TParams['_output_in'], $TOutput>>,
   ): Procedure<
+    TParams['ctx'],
     TParams['_input_in'],
     FallbackValue<TParams['_output_in'], $TOutput>
   >;
