@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { initTRPC } from './lib';
+import { initTRPC } from './lib/server';
 
 ////////// app bootstrap & middlewares ////////
 type Context = {
@@ -35,6 +35,7 @@ let postsDb = [
 ];
 
 const proc = trpc.procedure;
+const authedProcedure = proc.use(isAuthed);
 
 // A reusable combination of an input + middleware that can be reused
 function isPartofOrg<
@@ -173,22 +174,3 @@ export const appRouter = trpc.router({
       }),
   },
 });
-
-// some testing
-// TODO delete me
-async function main() {
-  {
-    const output = await appRouter.mutations.editOrg({
-      organizationId: '123',
-      data: {
-        name: 'asd',
-        len: 'asdasd',
-      },
-    });
-  }
-  {
-    const output = await appRouter.mutations.updateToken('hey');
-  }
-}
-
-main();
