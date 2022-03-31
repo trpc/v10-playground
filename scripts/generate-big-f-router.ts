@@ -8,17 +8,6 @@ import { trpc } from '../context';
 import { z } from 'zod';
 __IMPORTS__
 
-const proc = trpc.procedure
-.input(
-  z.object({
-    hello: z.string(),
-    lengthOf: z
-      .string()
-      .transform((s) => s.length)
-      .optional()
-      .default(''),
-  })
-);
 export const __ROUTER_NAME__ = trpc.router({
   queries: {
     __CONTENT__
@@ -45,7 +34,17 @@ for (let routerIndex = 0; routerIndex < NUM_ROUTERS; routerIndex++) {
     routerFile.push(
       '\n' +
         `
-  r${routerIndex}q${procIndex}: proc
+  r${routerIndex}q${procIndex}: trpc.procedure
+    .input(
+      z.object({
+        hello: z.string(),
+        lengthOf: z
+          .string()
+          .transform((s) => s.length)
+          .optional()
+          .default(''),
+      })
+    )
     .resolve((params) => {
       return {
         input: params.input,
