@@ -6,6 +6,7 @@ async function main() {
   {
     // query 'whoami'
     const result = await appRouter.queries.viewerWhoAmi();
+    console.log({ result });
   }
   {
     const output = await appRouter.mutations.editOrg({

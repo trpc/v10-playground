@@ -8,7 +8,7 @@ async function main() {
   const greeting = await client.query.postList();
   const byId = await client.query.postById({ id: '1' });
 
-  console.log('data', byId.data);
+  console.log('data', { greeting, byId });
 }
 
 main();
