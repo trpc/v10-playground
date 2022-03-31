@@ -1,12 +1,16 @@
 import { ProcedureType } from './procedure';
 
+/**
+ * @internal
+ */
 export const middlewareMarker = Symbol('middlewareMarker');
+type MiddlewareMarker = typeof middlewareMarker;
 interface MiddlewareResultBase<TParams extends Params> {
   /**
    * All middlewares should pass through their `next()`'s output.
    * Requiring this marker makes sure that can't be forgotten at compile-time.
    */
-  readonly marker: typeof middlewareMarker;
+  readonly marker: MiddlewareMarker;
   ctx: TParams['ctx'];
 }
 
