@@ -58,7 +58,6 @@ function isPartofOrg<
 
     return params.next({
       ctx: {
-        ...ctx,
         user,
       },
     });
@@ -139,7 +138,6 @@ export const appRouter = trpc.router({
       .use((params) =>
         params.next({
           ctx: {
-            ...params.ctx,
             // just testing that this doesn't get lost along the way
             foo: {
               bar: 'bar',
