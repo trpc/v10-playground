@@ -1,7 +1,6 @@
 import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import { initTRPC } from './lib';
-import { inferMiddlewareParams } from './lib/middleware';
 
 ////////// app bootstrap & middlewares ////////
 type Context = {
@@ -110,18 +109,6 @@ export const appRouter = trpc.router({
       // `ctx.user` is now `NonNullable`
       return `your id is ${ctx.user.id}`;
     }),
-    testtesttest: proc
-      .use((params) => {
-        return params.next({
-          _input_in: '_input_in' as const,
-          input: 'input' as const,
-          ctx: 'ctx' as const,
-        });
-      })
-      .resolve(({ input, ctx }) => {
-        expectTypeOf(ctx).toMatchTypeOf<'ctx'>();
-        expectTypeOf(input).toMatchTypeOf<'input'>();
-      }),
   },
 
   mutations: {
@@ -149,25 +136,11 @@ export const appRouter = trpc.router({
       // no return
     }),
     editOrg: proc
-      .input(
-        z.object({
-          organizationId: z.string(),
-          data: z.object({
-            name: z.string(),
-            len: z.string().transform((v) => v.length),
-          }),
-        }),
-      )
-      .resolve(({ ctx, input }) => {
-        console.log(input);
-
-        console.log(ctx, ctx);
-      }),
-    editOrg2: proc
       .use((params) =>
         params.next({
           ctx: {
             ...params.ctx,
+            // just testing that this doesn't get lost along the way
             foo: {
               bar: 'bar',
             },

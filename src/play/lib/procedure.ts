@@ -1,5 +1,5 @@
 import { MiddlewareFunction, Params } from './middleware';
-import { ParserWithInputOutput, Parser, inferParser } from './parser';
+import { Parser, inferParser } from './parser';
 import { Overwrite } from './utils';
 
 // type ProcedureBuilder
