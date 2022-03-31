@@ -50,6 +50,7 @@ function isPartOfOrg<
 
     return params.next({
       input,
+      _input_in: undefined as never as TSchema['_input'],
       ctx: {
         ...ctx,
         input,
@@ -119,6 +120,7 @@ export const appRouter = trpc.router({
     tetete: proc
       .use((params) => {
         return params.next({
+          _input_in: '_input_in' as const,
           input: 'input' as const,
           ctx: 'ctx' as const,
         });

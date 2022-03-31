@@ -13,11 +13,11 @@ export type Procedure<_TContext, TInput, TOutput> = TInput extends undefined
   ? (input?: TInput) => Promise<TOutput>
   : (input: TInput) => Promise<TOutput>;
 
-export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
-  input<$TInput, $TParsedInput>(
-    schema: ParserWithInputOutput<$TInput, $TParsedInput>,
+export interface ProcedureReturnInput<TContext, TInputIn, TInputOut, TOutput> {
+  input<$TInputIn, $TInputOut>(
+    schema: ParserWithInputOutput<$TInputIn, $TInputOut>,
   ): Omit<
-    ProcedureReturnInput<TContext, $TInput, $TParsedInput, TOutput>,
+    ProcedureReturnInput<TContext, $TInputIn, $TInputOut, TOutput>,
     'input'
   >;
   input<$TParser extends Parser>(
@@ -37,23 +37,24 @@ export interface ProcedureReturnInput<TContext, TInput, TParsedInput, TOutput> {
     fn: MiddlewareFunction<
       {
         ctx: TContext;
-        input: TInput;
+        input: TInputIn;
+        _input_in: TInputOut;
       },
       $TParams
     >,
   ): ProcedureReturnInput<
-    $TParams['ctx'],
-    $TParams['input'],
-    $TParams['input'],
+    undefined extends $TParams['ctx'] ? TContext : $TParams['ctx'],
+    undefined extends $TParams['_input_in'] ? TInputIn : $TParams['_input_in'],
+    undefined extends $TParams['input'] ? TInputOut : $TParams['input'],
     TOutput
   >;
   resolve<$TOutput>(
     resolver: (
-      opts: ResolveOptions<TContext, TParsedInput>,
+      opts: ResolveOptions<TContext, TInputOut>,
     ) => MaybePromise<$TOutput>,
   ): TOutput extends unknown
-    ? Procedure<TContext, TInput, $TOutput>
-    : Procedure<TContext, TInput, TOutput>;
+    ? Procedure<TContext, TInputIn, $TOutput>
+    : Procedure<TContext, TInputIn, TOutput>;
 }
 
 export function createProcedureFactory<TContext>() {

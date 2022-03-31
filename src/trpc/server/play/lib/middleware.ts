@@ -8,10 +8,6 @@ interface MiddlewareResultBase<TParams extends Params> {
    */
   readonly marker: typeof middlewareMarker;
   ctx: TParams['ctx'];
-  /**
-   * @deprecated remove me
-   */
-  input: TParams['input'];
 }
 
 interface MiddlewareOKResult<TParams extends Params>
@@ -31,9 +27,14 @@ export type MiddlewareResult<TParams extends Params> =
   | MiddlewareOKResult<TParams>
   | MiddlewareErrorResult<TParams>;
 
-export interface Params<TContext = unknown, TInput = unknown> {
+export interface Params<
+  TContext = unknown,
+  TInputIn = unknown,
+  TInputOut = unknown,
+> {
   ctx: TContext;
-  input: TInput;
+  _input_in: TInputIn;
+  input: TInputOut;
 }
 
 export type MiddlewareFunction<
@@ -44,19 +45,34 @@ export type MiddlewareFunction<
   type: ProcedureType;
   path: string;
   rawInput: unknown;
-  input: TParams['input'];
   next: {
     (): Promise<MiddlewareResult<TParams>>;
     <$TContext>(opts: { ctx: $TContext }): Promise<
-      MiddlewareResult<{ ctx: $TContext; input: TParams['input'] }>
-    >;
-    <$Input>(opts: { input: $Input }): Promise<
-      MiddlewareResult<{ input: $Input; ctx: TParams['ctx'] }>
-    >;
-    <$TContext, $TInput>(opts: { input: $TInput; ctx: $TContext }): Promise<
       MiddlewareResult<{
         ctx: $TContext;
-        input: $TInput;
+        input: TParams['input'];
+        _input_in: TParams['input'];
+      }>
+    >;
+    <$TInputIn, $InputOut>(opts: {
+      _input_in: $TInputIn;
+      input: $InputOut;
+    }): Promise<
+      MiddlewareResult<{
+        _input_in: $TInputIn;
+        input: $InputOut;
+        ctx: TParams['ctx'];
+      }>
+    >;
+    <$TContext, $TInputIn, $TInputOut>(opts: {
+      _input_in: $TInputIn;
+      input: $TInputOut;
+      ctx: $TContext;
+    }): Promise<
+      MiddlewareResult<{
+        _input_in: $TInputIn;
+        ctx: $TContext;
+        input: $TInputOut;
       }>
     >;
   };
@@ -70,7 +86,10 @@ export type inferMiddlewareParams<
 
 export function createMiddlewareFactory<TContext>() {
   return function createMiddleware<$TNewParams extends Params>(
-    fn: MiddlewareFunction<{ ctx: TContext; input: unknown }, $TNewParams>,
+    fn: MiddlewareFunction<
+      { ctx: TContext; input: unknown; _input_in: unknown },
+      $TNewParams
+    >,
   ) {
     return fn;
   };
