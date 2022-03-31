@@ -1,10 +1,6 @@
 import { ProcedureType } from './procedure';
+import { MiddlewareMarker, UnsetMarker } from './utils';
 
-/**
- * @internal
- */
-export const middlewareMarker = Symbol('middlewareMarker');
-type MiddlewareMarker = typeof middlewareMarker;
 interface MiddlewareResultBase<TParams extends Params> {
   /**
    * All middlewares should pass through their `next()`'s output.

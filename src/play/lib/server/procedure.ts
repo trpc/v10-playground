@@ -1,6 +1,6 @@
 import { MiddlewareFunction, Params } from './middleware';
 import { Parser, inferParser } from './parser';
-import { DefaultValue as FallbackValue, Overwrite } from './utils';
+import { DefaultValue as FallbackValue, Overwrite, UnsetMarker } from './utils';
 
 // type ProcedureBuilder
 type MaybePromise<T> = T | Promise<T>;
@@ -10,7 +10,9 @@ interface ResolveOptions<TContext, TInput> {
 }
 export type ProcedureType = 'query' | 'mutation' | 'subscription';
 
-export type Procedure<TInput, TOutput> = TInput extends undefined
+export type Procedure<TInput, TOutput> = TInput extends UnsetMarker
+  ? (input?: undefined) => Promise<TOutput>
+  : TInput extends undefined
   ? (input?: TInput) => Promise<TOutput>
   : (input: TInput) => Promise<TOutput>;
 
@@ -65,10 +67,10 @@ export interface ProcedureReturnInput<TParams extends Params> {
 export function createProcedureFactory<TContext>() {
   return function createProcedure(): ProcedureReturnInput<{
     ctx: TContext;
-    input: undefined;
-    _input_in: undefined;
-    _output_in: undefined;
-    _output_out: undefined;
+    input: UnsetMarker;
+    _input_in: UnsetMarker;
+    _output_in: UnsetMarker;
+    _output_out: UnsetMarker;
   }> {
     throw new Error('unimplemented');
   };

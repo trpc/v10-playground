@@ -70,6 +70,7 @@ export const appRouter = trpc.router({
   queries: {
     // simple procedure without args avialable at postAll`
     postList: async () => postsDb,
+    postList2: proc.resolve(() => postsDb),
     // get post by id or 404 if it's not found
     postById: proc
       .input(
@@ -168,6 +169,13 @@ export const appRouter = trpc.router({
     updateToken: proc
       .input(z.string())
       .output(z.literal('ok'))
+      // @ts-expect-error output validation
+      .resolve(({ input }) => {
+        return input;
+      }),
+
+    voidResponse: proc
+      .output(z.void())
       // @ts-expect-error output validation
       .resolve(({ input }) => {
         return input;
