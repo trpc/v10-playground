@@ -6,7 +6,7 @@ const client = createClient<typeof appRouter>();
 async function main() {
   const result = await client.query.r0q0({ hello: 'world' });
 
-  console.log(result.data);
+  console.log(result);
 }
 
 main();
