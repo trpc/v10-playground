@@ -166,6 +166,13 @@ export const appRouter = trpc.router({
         console.log(ctx.user.id);
         return input;
       }),
+
+    updateTokenHappy: proc
+      .input(z.string())
+      .output(z.literal('ok'))
+      .resolve(({ input }) => {
+        return 'ok';
+      }),
     updateToken: proc
       .input(z.string())
       .output(z.literal('ok'))
