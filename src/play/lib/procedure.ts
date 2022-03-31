@@ -30,8 +30,8 @@ export interface ProcedureReturnInput<TParams extends Params> {
     schema: $TParser,
   ): ProcedureReturnInput<{
     ctx: TParams['ctx'];
-    _input_in: NonNullable<inferParser<$TParser>['in']>;
-    input: NonNullable<inferParser<$TParser>['out']>;
+    _input_in: inferParser<$TParser>['in'];
+    input: inferParser<$TParser>['out'];
   }>;
   use<$TParams extends Params>(
     fn: MiddlewareFunction<TParams, $TParams>,
@@ -43,9 +43,9 @@ export interface ProcedureReturnInput<TParams extends Params> {
     : never;
   resolve<$TOutput>(
     resolver: (
-      opts: ResolveOptions<TParams['ctx'], TParams['_input_in']>,
+      opts: ResolveOptions<TParams['ctx'], TParams['input']>,
     ) => MaybePromise<$TOutput>,
-  ): Procedure<TParams['ctx'], TParams['_input_in'], $TOutput>;
+  ): Procedure<TParams['ctx'], TParams['input'], $TOutput>;
 }
 
 export function createProcedureFactory<TContext>() {
