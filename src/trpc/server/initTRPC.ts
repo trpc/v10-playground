@@ -1,31 +1,24 @@
-import {
-  createRouterWithContext,
-  createNewContext,
-  pipedResolver,
-  zod,
-  mergeRouters,
-  error,
-} from '.';
+import { createRouterWithContext, mergeRouters } from './router';
+import { createBuilder as createProcedure } from './procedure';
+import { createMiddlewareFactory } from './middleware';
 
 export function initTRPC<TContext>() {
   return {
     /**
-     * Create procedure resolver
+     * Builder object for creating procedures
      */
-    resolver: pipedResolver<TContext>(),
+    procedure: createProcedure<TContext>(),
     /**
-     * Create router
+     * Create reusable middlewares
+     */
+    middleware: createMiddlewareFactory<TContext>(),
+    /**
+     * Create a router
      */
     router: createRouterWithContext<TContext>(),
     /**
-     * Helper for creating a new context middleware
+     * Merge Routers
      */
-    newContext: createNewContext<TContext>(),
-    /**
-     * Zod middlware
-     */
-    zod,
     mergeRouters,
-    error,
   };
 }

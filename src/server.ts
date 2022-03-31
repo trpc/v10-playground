@@ -3,24 +3,25 @@ import { initTRPC } from './trpc/server';
 
 ////////// app bootstrap & middlewares ////////
 type Context = {
+  db?: {};
   user?: {
     id: string;
+    memberships: {
+      organizationId: string;
+    }[];
   };
 };
 const trpc = initTRPC<Context>();
 
-const isAuthed = trpc.newContext((params) => {
+const isAuthed = trpc.middleware((params) => {
   if (!params.ctx.user) {
-    return trpc.error({
-      code: 'UNAUTHORIZED',
-    });
+    throw new Error('zup');
   }
-  return {
+  return params.next({
     ctx: {
-      ...params.ctx,
       user: params.ctx.user,
     },
-  };
+  });
 });
 
 // mock db
@@ -33,33 +34,61 @@ let postsDb = [
   },
 ];
 
+const procedure = trpc.procedure;
+// const authedProcedure = proc.use(isAuthed);
+
+/**
+ * A reusable combination of an input + middleware that can be reused.
+ * Accepts a Zod-schema as a generic.
+ */
+function isPartofOrg<
+  TSchema extends z.ZodObject<{ organizationId: z.ZodString }>,
+>(schema: TSchema) {
+  return procedure.input(schema).use((params) => {
+    const { ctx, input } = params;
+    const { user } = ctx;
+    if (!user) {
+      throw new Error('UNAUTHORIZED');
+    }
+
+    if (
+      !user.memberships.some(
+        (membership) => membership.organizationId !== input.organizationId,
+      )
+    ) {
+      throw new Error('FORBIDDEN');
+    }
+
+    return params.next({
+      ctx: {
+        user,
+      },
+    });
+  });
+}
+
 /////////// app root router //////////
 export const appRouter = trpc.router({
   queries: {
     // simple procedure without args avialable at postAll`
-    postList: trpc.resolver((_params) => {
-      return postsDb;
-    }),
+    postList: procedure.resolve(() => postsDb),
     // get post by id or 404 if it's not found
-    postById: trpc.resolver(
-      trpc.zod(
+    postById: procedure
+      .input(
         z.object({
           id: z.string(),
         }),
-      ),
-      ({ input }) => {
+      )
+      .resolve(({ input }) => {
         const post = postsDb.find((post) => post.id === input.id);
         if (!post) {
-          return trpc.error({ code: 'NOT_FOUND' });
+          throw new Error('NOT_FOUND');
         }
-        return {
-          data: postsDb,
-        };
-      },
-    ),
+        return post;
+      }),
     // procedure with input validation called `greeting`
-    greeting: trpc.resolver(
-      trpc.zod(
+    greeting: procedure
+      .input(
         z.object({
           hello: z.string(),
           lengthOf: z
@@ -68,59 +97,90 @@ export const appRouter = trpc.router({
             .optional()
             .default(''),
         }),
-      ),
-      (params) => {
+      )
+      .resolve((params) => {
         return {
           greeting: 'hello ' + params.ctx.user?.id ?? params.input.hello,
         };
-      },
-    ),
+      }),
     // procedure with auth
-    viewerWhoami: trpc.resolver(
+    viewerWhoAmi: procedure.use(isAuthed).resolve(({ ctx }) => {
       // `isAuthed()` will propagate new `ctx`
-      isAuthed(),
-      ({ ctx }) => {
-        // `ctx.user` is now `NonNullable`
-        return `your id is ${ctx.user.id}`;
-      },
-    ),
-    // a bit iffy - if you want to use it without `trpc.resolver()`
-    aQueryWithoutResolverWrapper: () => {
-      return {
-        ok: true,
-        data: 'test',
-      };
-    },
+      // `ctx.user` is now `NonNullable`
+      return `your id is ${ctx.user.id}`;
+    }),
   },
+
   mutations: {
     // mutation with auth + input
-    postAdd: trpc.resolver(
-      trpc.zod(
+    postAdd: procedure
+      .input(
         z.object({
           title: z.string(),
           body: z.string(),
         }),
-      ),
-      isAuthed(),
-      ({ input, ctx }) => {
+      )
+      .use(isAuthed)
+      .resolve(({ ctx, input }) => {
         const post: typeof postsDb[number] = {
           ...input,
           id: `${Math.random()}`,
           userId: ctx.user.id,
         };
         postsDb.push(post);
+        return post;
+      }),
+    fireAndForget: procedure.input(z.string()).resolve(() => {
+      // no return
+    }),
+    editOrg: procedure
+      .apply(
+        isPartofOrg(
+          z.object({
+            organizationId: z.string(),
+            data: z
+              .object({
+                name: z.string(),
+              })
+              .partial(),
+          }),
+        ),
+      )
+      .resolve(({ input }) => {
+        // - User is guaranteed to be part of the organization queried
+        //-  `input` is of type:
+        // {
+        //   data: {
+        //       name: string;
+        //   };
+        //   organizationId: string;
+        // }
+        // [.... logic]
         return {
-          data: post,
+          id: input.organizationId,
+          ...input.data,
         };
-      },
-    ),
-    // mutation without a return type
-    fireAndForget: trpc.resolver(
-      //
-      trpc.zod(z.string()),
-      () => {
-        // no return
-      },
-    ),
+      }),
+
+    updateTokenHappy: procedure
+      .input(z.string())
+      .output(z.literal('ok'))
+      .resolve(() => {
+        return 'ok';
+      }),
+    updateToken: procedure
+      .input(z.string())
+      .output(z.literal('ok'))
+      // @ts-expect-error output validation
+      .resolve(({ input }) => {
+        return input;
+      }),
+
+    voidResponse: procedure
+      .output(z.void())
+      // @ts-expect-error output validation
+      .resolve(({ input }) => {
+        return input;
+      }),
   },
 });

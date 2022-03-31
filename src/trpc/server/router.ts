@@ -1,9 +1,6 @@
-import { Procedure } from './';
+import { Procedure } from './procedure';
 
-type ProcedureRecord<TContext> = Record<
-  string,
-  Procedure<{ ctx: TContext }, any, any>
->;
+type ProcedureRecord<TContext> = Record<string, Procedure<TContext, any, any>>;
 
 export interface ProceduresByType<TContext> {
   queries?: ProcedureRecord<TContext>;
@@ -50,22 +47,3 @@ export function mergeRouters<TRouters extends ProceduresByType<any>[]>(
 ): mergeRoutersVariadic<TRouters> {
   throw new Error('Unimplemnted');
 }
-
-// FIXME delete these comments
-// type TestContext = {
-//   ok: true;
-// };
-// const routerA = createRouterWithContext<TestContext>()({
-//   queries: {
-//     a: async () => ({ data: 'a' as const }),
-//   },
-// });
-
-// const routerB = createRouterWithContext<TestContext>()({
-//   queries: {
-//     b: async ({ ctx }) => ({ data: 'b' as const, ctx }),
-//   },
-// });
-// const routerMerged = mergeRouters(routerA, routerB);
-
-// routerMerged.queries.b;
