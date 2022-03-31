@@ -34,14 +34,17 @@ let postsDb = [
   },
 ];
 
-const proc = trpc.procedure;
+const procedure = trpc.procedure;
 // const authedProcedure = proc.use(isAuthed);
 
-// A reusable combination of an input + middleware that can be reused
+/**
+ * A reusable combination of an input + middleware that can be reused.
+ * Accepts a Zod-schema as a generic.
+ */
 function isPartofOrg<
   TSchema extends z.ZodObject<{ organizationId: z.ZodString }>,
 >(schema: TSchema) {
-  return proc.input(schema).use((params) => {
+  return procedure.input(schema).use((params) => {
     const { ctx, input } = params;
     const { user } = ctx;
     if (!user) {
@@ -49,7 +52,7 @@ function isPartofOrg<
     }
 
     if (
-      user.memberships.some(
+      !user.memberships.some(
         (membership) => membership.organizationId !== input.organizationId,
       )
     ) {
@@ -68,9 +71,9 @@ function isPartofOrg<
 export const appRouter = trpc.router({
   queries: {
     // simple procedure without args avialable at postAll`
-    postList: proc.resolve(() => postsDb),
+    postList: procedure.resolve(() => postsDb),
     // get post by id or 404 if it's not found
-    postById: proc
+    postById: procedure
       .input(
         z.object({
           id: z.string(),
@@ -81,12 +84,10 @@ export const appRouter = trpc.router({
         if (!post) {
           throw new Error('NOT_FOUND');
         }
-        return {
-          data: postsDb,
-        };
+        return post;
       }),
     // procedure with input validation called `greeting`
-    greeting: proc
+    greeting: procedure
       .input(
         z.object({
           hello: z.string(),
@@ -103,7 +104,7 @@ export const appRouter = trpc.router({
         };
       }),
     // procedure with auth
-    viewerWhoAmi: proc.use(isAuthed).resolve(({ ctx }) => {
+    viewerWhoAmi: procedure.use(isAuthed).resolve(({ ctx }) => {
       // `isAuthed()` will propagate new `ctx`
       // `ctx.user` is now `NonNullable`
       return `your id is ${ctx.user.id}`;
@@ -112,7 +113,7 @@ export const appRouter = trpc.router({
 
   mutations: {
     // mutation with auth + input
-    postAdd: proc
+    postAdd: procedure
       .input(
         z.object({
           title: z.string(),
@@ -127,50 +128,41 @@ export const appRouter = trpc.router({
           userId: ctx.user.id,
         };
         postsDb.push(post);
-        return {
-          data: post,
-        };
+        return post;
       }),
-    fireAndForget: proc.input(z.string()).resolve(() => {
+    fireAndForget: procedure.input(z.string()).resolve(() => {
       // no return
     }),
-    editOrg: proc
-      .use((params) =>
-        params.next({
-          ctx: {
-            // just testing that this doesn't get lost along the way
-            foo: {
-              bar: 'bar',
-            },
-          },
-        }),
-      )
+    editOrg: procedure
       .apply(
         isPartofOrg(
           z.object({
             organizationId: z.string(),
             data: z.object({
               name: z.string(),
-              len: z.string().transform((v) => v.length),
             }),
           }),
         ),
       )
       .resolve(({ ctx, input }) => {
-        console.log(input.data.len);
-        console.log(ctx.foo.bar);
-
-        console.log(ctx.user.id);
-        return input;
+        // - User is guaranteed to be part of the organization queried
+        //-  `input` is of type:
+        // {
+        //   data: {
+        //       name: string;
+        //   };
+        //   organizationId: string;
+        // }
+        // [.... logic]
       }),
 
-    updateTokenHappy: proc
+    updateTokenHappy: procedure
       .input(z.string())
       .output(z.literal('ok'))
       .resolve(() => {
         return 'ok';
       }),
-    updateToken: proc
+    updateToken: procedure
       .input(z.string())
       .output(z.literal('ok'))
       // @ts-expect-error output validation
@@ -178,7 +170,7 @@ export const appRouter = trpc.router({
         return input;
       }),
 
-    voidResponse: proc
+    voidResponse: procedure
       .output(z.void())
       // @ts-expect-error output validation
       .resolve(({ input }) => {

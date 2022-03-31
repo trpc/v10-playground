@@ -71,14 +71,12 @@ export interface ProcedureBuilder<TParams extends Params> {
   >;
 }
 
-export function createProcedureFactory<TContext>() {
-  return function createProcedure(): ProcedureBuilder<{
-    ctx: TContext;
-    _input_out: UnsetMarker;
-    _input_in: UnsetMarker;
-    _output_in: UnsetMarker;
-    _output_out: UnsetMarker;
-  }> {
-    throw new Error('unimplemented');
-  };
+export function createBuilder<TContext>(): ProcedureBuilder<{
+  ctx: TContext;
+  _input_out: UnsetMarker;
+  _input_in: UnsetMarker;
+  _output_in: UnsetMarker;
+  _output_out: UnsetMarker;
+}> {
+  throw new Error('unimplemented');
 }

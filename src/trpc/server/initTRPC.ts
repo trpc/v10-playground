@@ -1,18 +1,24 @@
 import { createRouterWithContext, mergeRouters } from './router';
-import { createProcedureFactory } from './procedure';
+import { createBuilder as createProcedure } from './procedure';
 import { createMiddlewareFactory } from './middleware';
 
 export function initTRPC<TContext>() {
   return {
     /**
-     * Create procedure resolver
+     * Builder object for creating procedures
      */
-    procedure: createProcedureFactory<TContext>()(),
+    procedure: createProcedure<TContext>(),
     /**
-     * Create router
+     * Create reusable middlewares
+     */
+    middleware: createMiddlewareFactory<TContext>(),
+    /**
+     * Create a router
      */
     router: createRouterWithContext<TContext>(),
+    /**
+     * Merge Routers
+     */
     mergeRouters,
-    middleware: createMiddlewareFactory<TContext>(),
   };
 }
