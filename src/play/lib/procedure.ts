@@ -14,14 +14,34 @@ export type Procedure<_TContext, TInput, TOutput> = TInput extends undefined
   ? (input?: TInput) => Promise<TOutput>
   : (input: TInput) => Promise<TOutput>;
 
+type CreateProcedureReturnInput<
+  TPrev extends Params,
+  TNext extends Params,
+> = ProcedureReturnInput<
+  undefined extends TNext['ctx']
+    ? TPrev['ctx']
+    : Overwrite<TPrev['ctx'], TNext['ctx']>,
+  undefined extends TNext['_input_in']
+    ? TPrev['_input_in']
+    : TNext['_input_in'],
+  undefined extends TNext['input'] ? TPrev['input'] : TNext['input'],
+  any
+>;
+
 export interface ProcedureReturnInput<TContext, TInputIn, TInputOut, TOutput> {
   input<$TParser extends Parser>(
     schema: $TParser,
-  ): ProcedureReturnInput<
-    TContext,
-    inferParser<$TParser>['in'],
-    inferParser<$TParser>['out'],
-    TOutput
+  ): CreateProcedureReturnInput<
+    {
+      _input_in: NonNullable<TInputIn>;
+      input: NonNullable<TInputOut>;
+      ctx: TContext;
+    },
+    {
+      _input_in: inferParser<$TParser>['in'];
+      input: inferParser<$TParser>['out'];
+      ctx: TContext;
+    }
   >;
   use<$TParams extends Params>(
     fn: MiddlewareFunction<
@@ -32,11 +52,13 @@ export interface ProcedureReturnInput<TContext, TInputIn, TInputOut, TOutput> {
       },
       $TParams
     >,
-  ): ProcedureReturnInput<
-    undefined extends $TParams['ctx'] ? TContext : $TParams['ctx'],
-    undefined extends $TParams['_input_in'] ? TInputIn : $TParams['_input_in'],
-    undefined extends $TParams['input'] ? TInputOut : $TParams['input'],
-    TOutput
+  ): CreateProcedureReturnInput<
+    {
+      _input_in: TInputIn;
+      input: TInputOut;
+      ctx: TContext;
+    },
+    $TParams
   >;
   apply<
     $ProcedureReturnInput extends Partial<
@@ -49,14 +71,20 @@ export interface ProcedureReturnInput<TContext, TInputIn, TInputOut, TOutput> {
       infer $TContext,
       infer $TInputIn,
       infer $TInputOut,
-      infer $TOutput
+      infer _$TOutput
     >
   >
-    ? ProcedureReturnInput<
-        Overwrite<TContext, $TContext>,
-        $TInputIn,
-        $TInputOut,
-        $TOutput
+    ? CreateProcedureReturnInput<
+        {
+          _input_in: TInputIn;
+          input: TInputOut;
+          ctx: TContext;
+        },
+        {
+          _input_in: $TInputIn;
+          input: $TInputOut;
+          ctx: $TContext;
+        }
       >
     : never;
   resolve<$TOutput>(

@@ -163,6 +163,16 @@ export const appRouter = trpc.router({
         console.log(ctx, ctx);
       }),
     editOrg2: proc
+      .use((params) =>
+        params.next({
+          ctx: {
+            ...params.ctx,
+            foo: {
+              bar: 'bar',
+            },
+          },
+        }),
+      )
       .apply(
         isPartofOrg(
           z.object({
@@ -176,6 +186,7 @@ export const appRouter = trpc.router({
       )
       .resolve(({ ctx, input }) => {
         console.log(input.data.len);
+        console.log(ctx.foo.bar);
 
         console.log(ctx.user.id);
       }),
