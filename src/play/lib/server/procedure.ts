@@ -19,7 +19,7 @@ export type Procedure<TInput, TOutput> = TInput extends UnsetMarker
 type CreateProcedureReturnInput<
   TPrev extends Params,
   TNext extends Params,
-> = ProcedureReturnInput<{
+> = ProcedureBuilder<{
   ctx: Overwrite<TPrev['ctx'], TNext['ctx']>;
   input: FallbackValue<TNext['input'], TPrev['input']>;
   _input_in: FallbackValue<TNext['_input_in'], TPrev['_input_in']>;
@@ -27,10 +27,10 @@ type CreateProcedureReturnInput<
   _output_out: FallbackValue<TNext['_output_out'], TPrev['_output_out']>;
 }>;
 
-export interface ProcedureReturnInput<TParams extends Params> {
+export interface ProcedureBuilder<TParams extends Params> {
   input<$TParser extends Parser>(
     schema: $TParser,
-  ): ProcedureReturnInput<{
+  ): ProcedureBuilder<{
     ctx: TParams['ctx'];
     _output_in: TParams['_output_in'];
     _output_out: TParams['_output_out'];
@@ -39,7 +39,7 @@ export interface ProcedureReturnInput<TParams extends Params> {
   }>;
   output<$TParser extends Parser>(
     schema: $TParser,
-  ): ProcedureReturnInput<{
+  ): ProcedureBuilder<{
     ctx: TParams['ctx'];
     _input_in: TParams['_input_in'];
     input: TParams['input'];
@@ -49,9 +49,9 @@ export interface ProcedureReturnInput<TParams extends Params> {
   use<$TParams extends Params>(
     fn: MiddlewareFunction<TParams, $TParams>,
   ): CreateProcedureReturnInput<TParams, $TParams>;
-  apply<$ProcedureReturnInput extends Partial<ProcedureReturnInput<any>>>(
+  apply<$ProcedureReturnInput extends Partial<ProcedureBuilder<any>>>(
     proc: $ProcedureReturnInput,
-  ): $ProcedureReturnInput extends Partial<ProcedureReturnInput<infer $TParams>>
+  ): $ProcedureReturnInput extends Partial<ProcedureBuilder<infer $TParams>>
     ? CreateProcedureReturnInput<TParams, $TParams>
     : never;
   resolve<$TOutput>(
@@ -65,7 +65,7 @@ export interface ProcedureReturnInput<TParams extends Params> {
 }
 
 export function createProcedureFactory<TContext>() {
-  return function createProcedure(): ProcedureReturnInput<{
+  return function createProcedure(): ProcedureBuilder<{
     ctx: TContext;
     input: UnsetMarker;
     _input_in: UnsetMarker;
