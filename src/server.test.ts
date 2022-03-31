@@ -13,15 +13,11 @@ async function main() {
       organizationId: '123',
       data: {
         name: 'asd',
-        len: 'asdasd',
       },
     });
     expectTypeOf(output).toMatchTypeOf<{
-      data: {
-        name: string;
-        len: number;
-      };
-      organizationId: string;
+      id: string;
+      name?: string;
     }>();
   }
   {

@@ -138,13 +138,15 @@ export const appRouter = trpc.router({
         isPartofOrg(
           z.object({
             organizationId: z.string(),
-            data: z.object({
-              name: z.string(),
-            }),
+            data: z
+              .object({
+                name: z.string(),
+              })
+              .partial(),
           }),
         ),
       )
-      .resolve(() => {
+      .resolve(({ input }) => {
         // - User is guaranteed to be part of the organization queried
         //-  `input` is of type:
         // {
@@ -154,6 +156,10 @@ export const appRouter = trpc.router({
         //   organizationId: string;
         // }
         // [.... logic]
+        return {
+          id: input.organizationId,
+          ...input.data,
+        };
       }),
 
     updateTokenHappy: procedure
