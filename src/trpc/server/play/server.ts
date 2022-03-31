@@ -38,7 +38,7 @@ let postsDb = [
 
 const proc = trpc.procedure;
 
-function isPartOfOrg2<
+function isPartofOrg<
   TSchema extends z.ZodObject<{ organizationId: z.ZodString }>,
 >(schema: TSchema) {
   return proc.input(schema).use((params) => {
@@ -164,7 +164,7 @@ export const appRouter = trpc.router({
       }),
     editOrg2: proc
       .apply(
-        isPartOfOrg2(
+        isPartofOrg(
           z.object({
             organizationId: z.string(),
             data: z.object({
