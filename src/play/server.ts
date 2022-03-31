@@ -176,10 +176,19 @@ export const appRouter = trpc.router({
 
 // some testing
 // TODO delete me
-const output = appRouter.mutations.editOrg({
-  organizationId: '123',
-  data: {
-    name: 'asd',
-    len: 'asdasd',
-  },
-});
+async function main() {
+  {
+    const output = await appRouter.mutations.editOrg({
+      organizationId: '123',
+      data: {
+        name: 'asd',
+        len: 'asdasd',
+      },
+    });
+  }
+  {
+    const output = await appRouter.mutations.updateToken('hey');
+  }
+}
+
+main();
