@@ -1,4 +1,3 @@
-import { expectTypeOf } from 'expect-type';
 import { z } from 'zod';
 import { initTRPC } from './lib';
 
