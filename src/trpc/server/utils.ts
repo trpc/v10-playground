@@ -26,3 +26,12 @@ export const unsetMarker = Symbol('unsetMarker');
  * @internal
  */
 export type UnsetMarker = typeof unsetMarker;
+
+/**
+ * @internal
+ */
+export const procedureMarker = Symbol('procedureMarker');
+/**
+ * @internal
+ */
+export type ProcedureMarker = typeof procedureMarker;

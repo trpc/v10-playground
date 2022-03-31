@@ -69,8 +69,7 @@ function isPartofOrg<
 export const appRouter = trpc.router({
   queries: {
     // simple procedure without args avialable at postAll`
-    postList: async () => postsDb,
-    postList2: proc.resolve(() => postsDb),
+    postList: proc.resolve(() => postsDb),
     // get post by id or 404 if it's not found
     postById: proc
       .input(
