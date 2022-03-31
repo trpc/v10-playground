@@ -144,7 +144,7 @@ export const appRouter = trpc.router({
           }),
         ),
       )
-      .resolve(({ ctx, input }) => {
+      .resolve(() => {
         // - User is guaranteed to be part of the organization queried
         //-  `input` is of type:
         // {
