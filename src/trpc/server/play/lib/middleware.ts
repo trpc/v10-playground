@@ -52,7 +52,7 @@ export type MiddlewareFunction<
       MiddlewareResult<{
         ctx: $TContext;
         input: TParams['input'];
-        _input_in: TParams['input'];
+        _input_in: TParams['_input_in'];
       }>
     >;
     <$TInputIn, $InputOut>(opts: {

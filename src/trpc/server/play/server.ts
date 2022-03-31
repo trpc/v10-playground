@@ -26,39 +26,6 @@ const isAuthed = trpc.middleware((params) => {
   });
 });
 
-function isPartOfOrg<
-  TSchema extends z.ZodObject<{ organizationId: z.ZodString }>,
->(schema: TSchema) {
-  return trpc.middleware(async (params) => {
-    const { ctx, rawInput } = params;
-    const { user } = ctx;
-    if (!user) {
-      throw new Error('UNAUTHORIZED');
-    }
-    const result = await schema.safeParseAsync(rawInput);
-    if (!result.success) {
-      throw new Error('BAD_INPUT');
-    }
-    const input = result.data as TSchema['_output'];
-    if (
-      user.memberships.some(
-        (membership) => membership.organizationId !== input.organizationId,
-      )
-    ) {
-      throw new Error('FORBIDDEN');
-    }
-
-    return params.next({
-      input,
-      _input_in: undefined as never as TSchema['_input'],
-      ctx: {
-        ...ctx,
-        user,
-      },
-    });
-  });
-}
-
 // mock db
 let postsDb = [
   {
@@ -90,8 +57,6 @@ function isPartOfOrg2<
     }
 
     return params.next({
-      input: input as TSchema['_output'],
-      _input_in: undefined as never as TSchema['_input'],
       ctx: {
         ...ctx,
         user,
@@ -183,21 +148,19 @@ export const appRouter = trpc.router({
       // no return
     }),
     editOrg: proc
-      .use(
-        isPartOfOrg(
-          z.object({
-            organizationId: z.string(),
-            data: z.object({
-              name: z.string(),
-            }),
+      .input(
+        z.object({
+          organizationId: z.string(),
+          data: z.object({
+            name: z.string(),
+            len: z.string().transform((v) => v.length),
           }),
-        ),
+        }),
       )
       .resolve(({ ctx, input }) => {
-        console.log(input); // <--------- todo
+        console.log(input);
 
         console.log(ctx, ctx);
-        console.log(ctx.user.id);
       }),
     editOrg2: proc
       .apply(
@@ -212,19 +175,9 @@ export const appRouter = trpc.router({
         ),
       )
       .resolve(({ ctx, input }) => {
-        console.log(input); // <--------- todo
+        console.log(input.data.len);
 
         console.log(ctx.user.id);
       }),
   },
 });
-
-const fn = isPartOfOrg2(
-  z.object({
-    organizationId: z.string(),
-    data: z.object({
-      name: z.string(),
-      len: z.string().transform((v) => v.length),
-    }),
-  }),
-).resolve(({ input }) => {});
