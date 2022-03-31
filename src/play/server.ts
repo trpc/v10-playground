@@ -38,6 +38,7 @@ let postsDb = [
 
 const proc = trpc.procedure;
 
+// A reusable combination of an input + middleware that can be reused
 function isPartofOrg<
   TSchema extends z.ZodObject<{ organizationId: z.ZodString }>,
 >(schema: TSchema) {
@@ -109,7 +110,7 @@ export const appRouter = trpc.router({
       // `ctx.user` is now `NonNullable`
       return `your id is ${ctx.user.id}`;
     }),
-    tetete: proc
+    testtesttest: proc
       .use((params) => {
         return params.next({
           _input_in: '_input_in' as const,
