@@ -14,14 +14,14 @@ export type Procedure<TInput, TOutput> = TInput extends UnsetMarker
   ? (input?: undefined) => Promise<TOutput>
   : TInput extends undefined
   ? (input?: TInput) => Promise<TOutput>
-  : (input: TInput) => Promise<TOutput>;
+  : (_input_out: TInput) => Promise<TOutput>;
 
 type CreateProcedureReturnInput<
   TPrev extends Params,
   TNext extends Params,
 > = ProcedureBuilder<{
   ctx: Overwrite<TPrev['ctx'], TNext['ctx']>;
-  input: FallbackValue<TNext['input'], TPrev['input']>;
+  _input_out: FallbackValue<TNext['_input_out'], TPrev['_input_out']>;
   _input_in: FallbackValue<TNext['_input_in'], TPrev['_input_in']>;
   _output_in: FallbackValue<TNext['_output_in'], TPrev['_output_in']>;
   _output_out: FallbackValue<TNext['_output_out'], TPrev['_output_out']>;
@@ -35,14 +35,14 @@ export interface ProcedureBuilder<TParams extends Params> {
     _output_in: TParams['_output_in'];
     _output_out: TParams['_output_out'];
     _input_in: inferParser<$TParser>['in'];
-    input: inferParser<$TParser>['out'];
+    _input_out: inferParser<$TParser>['out'];
   }>;
   output<$TParser extends Parser>(
     schema: $TParser,
   ): ProcedureBuilder<{
     ctx: TParams['ctx'];
     _input_in: TParams['_input_in'];
-    input: TParams['input'];
+    _input_out: TParams['_input_out'];
     _output_in: inferParser<$TParser>['in'];
     _output_out: inferParser<$TParser>['out'];
   }>;
@@ -56,7 +56,7 @@ export interface ProcedureBuilder<TParams extends Params> {
     : never;
   resolve<$TOutput>(
     resolver: (
-      opts: ResolveOptions<TParams['ctx'], TParams['input']>,
+      opts: ResolveOptions<TParams['ctx'], TParams['_input_out']>,
     ) => MaybePromise<FallbackValue<TParams['_output_in'], $TOutput>>,
   ): Procedure<
     TParams['_input_in'],
@@ -67,7 +67,7 @@ export interface ProcedureBuilder<TParams extends Params> {
 export function createProcedureFactory<TContext>() {
   return function createProcedure(): ProcedureBuilder<{
     ctx: TContext;
-    input: UnsetMarker;
+    _input_out: UnsetMarker;
     _input_in: UnsetMarker;
     _output_in: UnsetMarker;
     _output_out: UnsetMarker;

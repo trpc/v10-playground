@@ -38,7 +38,7 @@ export interface Params<
   _output_in: TOutputIn;
   _output_out: TOutputOut;
   _input_in: TInputIn;
-  input: TInputOut;
+  _input_out: TInputOut;
 }
 
 export type MiddlewareFunction<
@@ -48,15 +48,15 @@ export type MiddlewareFunction<
   ctx: TParams['ctx'];
   type: ProcedureType;
   path: string;
-  input: TParams['input'];
+  input: TParams['_input_out'];
   rawInput: unknown;
   next: {
     (): Promise<MiddlewareResult<TParams>>;
     <$TContext>(opts: { ctx: $TContext }): Promise<
       MiddlewareResult<{
         ctx: $TContext;
-        input: TParams['input'];
         _input_in: TParams['_input_in'];
+        _input_out: TParams['_input_out'];
         _output_in: TParams['_output_in'];
         _output_out: TParams['_output_out'];
       }>
@@ -75,7 +75,7 @@ export function createMiddlewareFactory<TContext>() {
     fn: MiddlewareFunction<
       {
         ctx: TContext;
-        input: unknown;
+        _input_out: unknown;
         _input_in: unknown;
         _output_in: unknown;
         _output_out: unknown;
