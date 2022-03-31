@@ -8,13 +8,7 @@ async function main() {
   const greeting = await client.query.postList();
   const byId = await client.query.postById({ id: '1' });
 
-  if (byId.ok) {
-    console.log('data', byId.data);
-  } else {
-    console.log(byId.error.code);
-  }
-
-  console.log({ greeting, byId });
+  console.log('data', { greeting, byId });
 }
 
 main();

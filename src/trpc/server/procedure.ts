@@ -1,87 +1,78 @@
-import { ExcludeErrorLike, inferProcedureArgs, OnlyErrorLike } from '.';
-import { Middleware } from './middlewares/core';
-import { TRPC_ERROR_CODE_KEY } from './rpc';
+import { MiddlewareFunction, Params } from './middleware';
+import { Parser, inferParser } from './parser';
+import { DefaultValue as FallbackValue, Overwrite, UnsetMarker } from './utils';
 
-const errorMarker = Symbol('errorMarker');
-///////////// utils //////////////
-
-export type MaybePromise<T> = T | Promise<T>;
-
-//////// response shapes //////////
-export interface ResultErrorData {
-  code: TRPC_ERROR_CODE_KEY;
-}
-export interface ProcedureResultError<
-  TResultErrorData extends ResultErrorData,
-> {
-  readonly _error: typeof errorMarker;
-  error: TResultErrorData;
-}
-export type Resolver<TInputParams, TResult = never> = (
-  params: TInputParams,
-) => MaybePromise<TResult>;
-
-export interface Params<TContext> {
+// type ProcedureBuilder
+type MaybePromise<T> = T | Promise<T>;
+interface ResolveOptions<TContext, TInput> {
   ctx: TContext;
-  rawInput?: unknown;
+  input: TInput;
+}
+export type ProcedureType = 'query' | 'mutation' | 'subscription';
+
+export type Procedure<_TContext, TInput, TOutput> = TInput extends UnsetMarker
+  ? (input?: undefined) => Promise<TOutput>
+  : TInput extends undefined
+  ? (input?: TInput) => Promise<TOutput>
+  : (_input_out: TInput) => Promise<TOutput>;
+
+type CreateProcedureReturnInput<
+  TPrev extends Params,
+  TNext extends Params,
+> = ProcedureBuilder<{
+  ctx: Overwrite<TPrev['ctx'], TNext['ctx']>;
+  _input_out: FallbackValue<TNext['_input_out'], TPrev['_input_out']>;
+  _input_in: FallbackValue<TNext['_input_in'], TPrev['_input_in']>;
+  _output_in: FallbackValue<TNext['_output_in'], TPrev['_output_in']>;
+  _output_out: FallbackValue<TNext['_output_out'], TPrev['_output_out']>;
+}>;
+
+export interface ProcedureBuilder<TParams extends Params> {
+  input<$TParser extends Parser>(
+    schema: $TParser,
+  ): ProcedureBuilder<{
+    ctx: TParams['ctx'];
+    _output_in: TParams['_output_in'];
+    _output_out: TParams['_output_out'];
+    _input_in: inferParser<$TParser>['in'];
+    _input_out: inferParser<$TParser>['out'];
+  }>;
+  output<$TParser extends Parser>(
+    schema: $TParser,
+  ): ProcedureBuilder<{
+    ctx: TParams['ctx'];
+    _input_in: TParams['_input_in'];
+    _input_out: TParams['_input_out'];
+    _output_in: inferParser<$TParser>['in'];
+    _output_out: inferParser<$TParser>['out'];
+  }>;
+  use<$TParams extends Params>(
+    fn: MiddlewareFunction<TParams, $TParams>,
+  ): CreateProcedureReturnInput<TParams, $TParams>;
+  apply<$ProcedureReturnInput extends Partial<ProcedureBuilder<any>>>(
+    proc: $ProcedureReturnInput,
+  ): $ProcedureReturnInput extends Partial<ProcedureBuilder<infer $TParams>>
+    ? CreateProcedureReturnInput<TParams, $TParams>
+    : never;
+  resolve<$TOutput>(
+    resolver: (
+      opts: ResolveOptions<TParams['ctx'], TParams['_input_out']>,
+    ) => MaybePromise<FallbackValue<TParams['_output_in'], $TOutput>>,
+  ): Procedure<
+    TParams['ctx'],
+    TParams['_input_in'],
+    FallbackValue<TParams['_output_in'], $TOutput>
+  >;
 }
 
-export interface ProcedureOKResult<T> {
-  ok: true;
-  data: T;
-  error?: undefined;
-}
-export interface ProcedureErrorResult<T> {
-  ok: false;
-  error: T;
-  data?: undefined;
-}
-
-export type ProcedureResult<T> =
-  | ProcedureOKResult<ExcludeErrorLike<T>>
-  | ProcedureErrorResult<OnlyErrorLike<T>['error']>;
-
-export type Procedure<_TBaseParams, TParams, TResult> = (
-  ...args: inferProcedureArgs<TParams>
-) => MaybePromise<ProcedureResult<TResult>>;
-
-export function pipedResolver<TContext>() {
-  type TBaseParams = Params<TContext>;
-
-  function middlewares<TResult>(
-    resolver: Resolver<TBaseParams, TResult>,
-  ): Procedure<TBaseParams, TBaseParams, TResult>;
-  function middlewares<
-    TResult,
-    MW1Params extends TBaseParams = TBaseParams,
-    MW1Result = never,
-  >(
-    middleware1: Middleware<TBaseParams, MW1Params, MW1Result>,
-    resolver: Resolver<MW1Params, TResult>,
-  ): Procedure<TBaseParams, MW1Params, TResult | MW1Result>;
-  function middlewares<
-    TResult,
-    MW1Params extends TBaseParams = TBaseParams,
-    MW1Result = never,
-    MW2Params extends TBaseParams = MW1Params,
-    MW2Result = never,
-  >(
-    middleware1: Middleware<TBaseParams, MW1Params, MW1Result>,
-    middleware2: Middleware<MW1Params, MW2Params, MW2Result>,
-    resolver: Resolver<MW2Params, TResult>,
-  ): Procedure<TBaseParams, MW2Params, TResult | MW1Result | MW2Result>;
-  function middlewares(..._args: any): any {
-    throw new Error('Unimplemented');
-  }
-
-  return middlewares;
-}
-
-export function error<T extends ResultErrorData>(
-  err: T,
-): ProcedureResultError<T> {
-  return {
-    error: err,
-    _error: errorMarker,
+export function createProcedureFactory<TContext>() {
+  return function createProcedure(): ProcedureBuilder<{
+    ctx: TContext;
+    _input_out: UnsetMarker;
+    _input_in: UnsetMarker;
+    _output_in: UnsetMarker;
+    _output_out: UnsetMarker;
+  }> {
+    throw new Error('unimplemented');
   };
 }
