@@ -44,6 +44,7 @@ export type MiddlewareFunction<
   ctx: TParams['ctx'];
   type: ProcedureType;
   path: string;
+  input: TParams['input'];
   rawInput: unknown;
   next: {
     (): Promise<MiddlewareResult<TParams>>;

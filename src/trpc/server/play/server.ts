@@ -53,14 +53,11 @@ function isPartOfOrg<
       _input_in: undefined as never as TSchema['_input'],
       ctx: {
         ...ctx,
-        input,
         user,
       },
     });
   });
 }
-
-type TTest = inferMiddlewareParams<ReturnType<typeof isPartOfOrg>>;
 
 // mock db
 let postsDb = [
@@ -73,6 +70,36 @@ let postsDb = [
 ];
 
 const proc = trpc.procedure;
+
+function isPartOfOrg2<
+  TSchema extends z.ZodObject<{ organizationId: z.ZodString }>,
+>(schema: TSchema) {
+  return proc.input(schema).use((params) => {
+    const { ctx, input } = params;
+    const { user } = ctx;
+    if (!user) {
+      throw new Error('UNAUTHORIZED');
+    }
+
+    if (
+      user.memberships.some(
+        (membership) => membership.organizationId !== input.organizationId,
+      )
+    ) {
+      throw new Error('FORBIDDEN');
+    }
+
+    return params.next({
+      input: input as TSchema['_output'],
+      _input_in: undefined as never as TSchema['_input'],
+      ctx: {
+        ...ctx,
+        user,
+      },
+    });
+  });
+}
+
 /////////// app root router //////////
 export const appRouter = trpc.router({
   queries: {
@@ -168,8 +195,36 @@ export const appRouter = trpc.router({
       )
       .resolve(({ ctx, input }) => {
         console.log(input); // <--------- todo
-        console.log(ctx.input, ctx);
+
+        console.log(ctx, ctx);
+        console.log(ctx.user.id);
+      }),
+    editOrg2: proc
+      .apply(
+        isPartOfOrg2(
+          z.object({
+            organizationId: z.string(),
+            data: z.object({
+              name: z.string(),
+              len: z.string().transform((v) => v.length),
+            }),
+          }),
+        ),
+      )
+      .resolve(({ ctx, input }) => {
+        console.log(input); // <--------- todo
+
         console.log(ctx.user.id);
       }),
   },
 });
+
+const fn = isPartOfOrg2(
+  z.object({
+    organizationId: z.string(),
+    data: z.object({
+      name: z.string(),
+      len: z.string().transform((v) => v.length),
+    }),
+  }),
+).resolve(({ input }) => {});
