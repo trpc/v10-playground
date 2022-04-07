@@ -28,3 +28,68 @@ Early draft of how a future [tRPC](https://trpc.io)-version could look like.
 - **Enabling having a watchers**-based structure - as you see, that `createRouter()` could easily be automatically generated from a file/folder structure.
 - **Better scaling** than current structure - the TypeScript server starts choking a bit when you get close to 100 procedures in your backend
 
+
+## Late night ideas
+
+### Refactor procedure
+
+```tsx
+// Add `input` envelope to allow for extras
+type CallContext = Record<string, unknown>;
+
+export type Procedure<Params> = (Params['input_in'] extends UnsetMarker
+  ? (opts?: { input?: undefined; context: CallContext}) => Promise<TOutput>
+  : TInput extends undefined
+  ? (opts?: { input?: Params['input_in']; context: CallContext}) => Promise<TOutput>
+  : (opts: { input: Params['input_in']; context: CallContext}) => Promise<TOutput>) &
+  ProcedureMarker;
+```
+
+### When using React
+
+```tsx
+import {initTRPC} from "@trpc/react/server";
+
+const trpc = initTRPC<Context>()
+
+
+/////////// app root router //////////
+export const appRouter = trpc.router({
+  queries: {
+    greeting: trpc.query
+      .input(
+        z.string(),
+      )
+      .resolve((params) => {
+        return {
+          greeting: 'hello ' + params.ctx.user?.id ?? params.input.hello,
+        };
+      }),
+  }
+})
+
+
+// Decorate with react-query options
+type CallContext = Record<string, unknown>;
+
+export type Procedure<Params> = (Params['input_in'] extends UnsetMarker
+  ? (opts?: ProcedureOptions<undefined>) => Promise<TOutput>
+  : TInput extends undefined
+  ? (opts?: { input?: Params['input_in']; context: CallContext}) => Promise<TOutput>
+  : (opts: { input: Params['input_in']; context: CallContext}) => Promise<TOutput>) &
+  ProcedureMarker;
+
+
+// usage:
+trpc.useQuery.greeting({
+  input: 'world,
+  context: {},
+  // ...react-query props
+})
+// or
+trpc.query.greeting.use({
+  input: 'world,
+  context: {},
+  // ...react-query props
+})
+```
