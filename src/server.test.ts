@@ -8,6 +8,12 @@ async function main() {
     const output = await appRouter.queries.viewerWhoAmi();
     console.log({ output });
     expectTypeOf(output).toBeString();
+
+    // should work
+    await appRouter.queries.viewerWhoAmi({});
+    await appRouter.queries.viewerWhoAmi({
+      input: undefined,
+    });
   }
   {
     const output = await appRouter.mutations.updateToken({ input: 'asd' });
