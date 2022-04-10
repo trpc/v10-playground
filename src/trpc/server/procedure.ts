@@ -15,16 +15,23 @@ interface ResolveOptions<TContext, TInput> {
 }
 export type ProcedureType = 'query' | 'mutation' | 'subscription';
 
+type ClientContext = Record<string, unknown>;
+type ProcedureOptions<TInput> = {
+  context?: ClientContext;
+} & TInput;
+
 export type Procedure<TParams extends Params> =
   (TParams['_input_in'] extends UnsetMarker
-    ? (opts?: { input?: undefined }) => Promise<TParams['_output_out']>
+    ? (
+        opts?: ProcedureOptions<{ input: undefined }>,
+      ) => Promise<TParams['_output_out']>
     : TParams['_input_in'] extends undefined
-    ? (opts?: {
-        input?: TParams['_input_in'];
-      }) => Promise<TParams['_output_out']>
-    : (opts: {
-        input: TParams['_input_in'];
-      }) => Promise<TParams['_output_out']>) &
+    ? (
+        opts?: ProcedureOptions<{ input?: TParams['_input_in'] }>,
+      ) => Promise<TParams['_output_out']>
+    : (
+        opts: ProcedureOptions<{ input: TParams['_input_in'] }>,
+      ) => Promise<TParams['_output_out']>) &
     ProcedureMarker;
 
 type CreateProcedureReturnInput<
