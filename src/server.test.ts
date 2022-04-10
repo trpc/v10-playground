@@ -10,15 +10,17 @@ async function main() {
     expectTypeOf(output).toBeString();
   }
   {
-    const output = await appRouter.mutations.updateToken('asd');
+    const output = await appRouter.mutations.updateToken({ input: 'asd' });
     expectTypeOf(output).toMatchTypeOf<string>();
   }
 
   {
     const output = await appRouter.mutations.editOrg({
-      organizationId: '123',
-      data: {
-        name: 'asd',
+      input: {
+        organizationId: '123',
+        data: {
+          name: 'asd',
+        },
       },
     });
     expectTypeOf(output).toMatchTypeOf<{
@@ -27,7 +29,7 @@ async function main() {
     }>();
   }
   {
-    const output = await appRouter.mutations.updateToken('hey');
+    const output = await appRouter.mutations.updateToken({ input: 'hey' });
 
     expectTypeOf(output).toMatchTypeOf<'ok'>();
   }

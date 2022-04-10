@@ -17,10 +17,14 @@ export type ProcedureType = 'query' | 'mutation' | 'subscription';
 
 export type Procedure<TParams extends Params> =
   (TParams['_input_in'] extends UnsetMarker
-    ? (input?: undefined) => Promise<TParams['_output_out']>
+    ? (opts?: { input?: undefined }) => Promise<TParams['_output_out']>
     : TParams['_input_in'] extends undefined
-    ? (input?: TParams['_input_in']) => Promise<TParams['_output_out']>
-    : (_input_out: TParams['_input_in']) => Promise<TParams['_output_out']>) &
+    ? (opts?: {
+        input?: TParams['_input_in'];
+      }) => Promise<TParams['_output_out']>
+    : (opts: {
+        input: TParams['_input_in'];
+      }) => Promise<TParams['_output_out']>) &
     ProcedureMarker;
 
 type CreateProcedureReturnInput<
