@@ -5,9 +5,15 @@ import { appRouter } from './server';
 async function main() {
   {
     // query 'whoami'
-    const result = await appRouter.queries.viewerWhoAmi();
-    console.log({ result });
+    const output = await appRouter.queries.viewerWhoAmi();
+    console.log({ output });
+    expectTypeOf(output).toBeString();
   }
+  {
+    const output = await appRouter.mutations.updateToken('asd');
+    expectTypeOf(output).toMatchTypeOf<string>();
+  }
+
   {
     const output = await appRouter.mutations.editOrg({
       organizationId: '123',
@@ -16,8 +22,8 @@ async function main() {
       },
     });
     expectTypeOf(output).toMatchTypeOf<{
-      id: string;
       name?: string;
+      id: string;
     }>();
   }
   {

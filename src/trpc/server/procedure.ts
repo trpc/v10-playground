@@ -15,12 +15,13 @@ interface ResolveOptions<TContext, TInput> {
 }
 export type ProcedureType = 'query' | 'mutation' | 'subscription';
 
-export type Procedure<_TContext, TInput, TOutput> = (TInput extends UnsetMarker
-  ? (input?: undefined) => Promise<TOutput>
-  : TInput extends undefined
-  ? (input?: TInput) => Promise<TOutput>
-  : (_input_out: TInput) => Promise<TOutput>) &
-  ProcedureMarker;
+export type Procedure<TParams extends Params> =
+  (TParams['_input_in'] extends UnsetMarker
+    ? (input?: undefined) => Promise<TParams['_output_out']>
+    : TParams['_input_in'] extends undefined
+    ? (input?: TParams['_input_in']) => Promise<TParams['_output_out']>
+    : (_input_out: TParams['_input_in']) => Promise<TParams['_output_out']>) &
+    ProcedureMarker;
 
 type CreateProcedureReturnInput<
   TPrev extends Params,
@@ -55,20 +56,26 @@ export interface ProcedureBuilder<TParams extends Params> {
   use<$TParams extends Params>(
     fn: MiddlewareFunction<TParams, $TParams>,
   ): CreateProcedureReturnInput<TParams, $TParams>;
-  apply<$ProcedureReturnInput extends Partial<ProcedureBuilder<any>>>(
+  apply<$ProcedureReturnInput extends ProcedureBuilder<any>>(
     proc: $ProcedureReturnInput,
-  ): $ProcedureReturnInput extends Partial<ProcedureBuilder<infer $TParams>>
+  ): $ProcedureReturnInput extends ProcedureBuilder<infer $TParams>
     ? CreateProcedureReturnInput<TParams, $TParams>
     : never;
   resolve<$TOutput>(
     resolver: (
       opts: ResolveOptions<TParams['ctx'], TParams['_input_out']>,
     ) => MaybePromise<FallbackValue<TParams['_output_in'], $TOutput>>,
-  ): Procedure<
-    TParams['ctx'],
-    TParams['_input_in'],
-    FallbackValue<TParams['_output_in'], $TOutput>
-  >;
+  ): UnsetMarker extends TParams['_output_out']
+    ? Procedure<
+        Overwrite<
+          TParams,
+          {
+            _output_in: $TOutput;
+            _output_out: $TOutput;
+          }
+        >
+      >
+    : Procedure<TParams>;
 }
 
 export function createBuilder<TContext>(): ProcedureBuilder<{

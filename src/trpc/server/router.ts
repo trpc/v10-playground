@@ -1,6 +1,7 @@
 import { Procedure } from './procedure';
 
-type ProcedureRecord<TContext> = Record<string, Procedure<TContext, any, any>>;
+// FIXME this should properly use TContext
+type ProcedureRecord<_TContext> = Record<string, Procedure<any>>;
 
 export interface ProceduresByType<TContext> {
   queries?: ProcedureRecord<TContext>;
