@@ -67,7 +67,7 @@ export interface ProcedureBuilder<TParams extends Params> {
   use<$TParams extends Params>(
     fn: MiddlewareFunction<TParams, $TParams>,
   ): CreateProcedureReturnInput<TParams, $TParams>;
-  apply<$ProcedureReturnInput extends ProcedureBuilder<any>>(
+  use<$ProcedureReturnInput extends ProcedureBuilder<any>>(
     proc: $ProcedureReturnInput,
   ): $ProcedureReturnInput extends ProcedureBuilder<infer $TParams>
     ? CreateProcedureReturnInput<TParams, $TParams>
