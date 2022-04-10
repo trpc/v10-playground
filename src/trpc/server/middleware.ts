@@ -1,6 +1,9 @@
 import { ProcedureType } from './procedure';
 import { MiddlewareMarker } from './utils';
 
+/**
+ * @internal
+ */
 interface MiddlewareResultBase<TParams extends Params> {
   /**
    * All middlewares should pass through their `next()`'s output.
@@ -10,12 +13,19 @@ interface MiddlewareResultBase<TParams extends Params> {
   ctx: TParams['ctx'];
 }
 
+/**
+ * @internal
+ */
 interface MiddlewareOKResult<TParams extends Params>
   extends MiddlewareResultBase<TParams> {
   ok: true;
   data: unknown;
   // this could be extended with `input`/`rawInput` later
 }
+
+/**
+ * @internal
+ */
 interface MiddlewareErrorResult<TParams extends Params>
   extends MiddlewareResultBase<TParams> {
   ok: false;
@@ -27,6 +37,9 @@ export type MiddlewareResult<TParams extends Params> =
   | MiddlewareOKResult<TParams>
   | MiddlewareErrorResult<TParams>;
 
+/**
+ * @internal
+ */
 export interface Params<
   TContext = unknown,
   TInputIn = unknown,
@@ -35,12 +48,27 @@ export interface Params<
   TOutputOut = unknown,
 > {
   ctx: TContext;
+  /**
+   * @internal
+   */
   _output_in: TOutputIn;
+  /**
+   * @internal
+   */
   _output_out: TOutputOut;
+  /**
+   * @internal
+   */
   _input_in: TInputIn;
+  /**
+   * @internal
+   */
   _input_out: TInputOut;
 }
 
+/**
+ * @internal
+ */
 export type MiddlewareFunction<
   TParams extends Params,
   TParamsAfter extends Params,
@@ -70,6 +98,9 @@ export type inferMiddlewareParams<
   ? $TParams
   : never;
 
+/**
+ * @internal
+ */
 export function createMiddlewareFactory<TContext>() {
   return function createMiddleware<$TNewParams extends Params>(
     fn: MiddlewareFunction<
