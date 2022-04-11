@@ -1,6 +1,6 @@
-import type { ProceduresByType } from '../server';
+import type { Router } from '../server';
 
-function createRouterProxy<TRouter extends ProceduresByType<any>>() {
+function createRouterProxy<TRouter extends Router<any>>() {
   return new Proxy({} as any, {
     get(_, type: string) {
       return new Proxy({} as any, {
@@ -12,14 +12,14 @@ function createRouterProxy<TRouter extends ProceduresByType<any>>() {
   }) as any as TRouter;
 }
 
-export interface TRPCClient<TRouter extends ProceduresByType<any>> {
+export interface TRPCClient<TRouter extends Router<any>> {
   query: NonNullable<TRouter['queries']>;
   mutation: NonNullable<TRouter['mutations']>;
   $query: never; // Observable version of query?
 }
 
 export function createClient<
-  TRouter extends ProceduresByType<any>,
+  TRouter extends Router<any>,
 >(): TRPCClient<TRouter> {
   const proxy = createRouterProxy<TRouter>();
 

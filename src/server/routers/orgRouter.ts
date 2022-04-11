@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TRPCError } from '../../@trpc/server/TRPCError';
 import { procedure, trpc } from '../context';
 
 /**
@@ -12,7 +13,7 @@ function isPartofOrg<
     const { ctx, input } = params;
     const { user } = ctx;
     if (!user) {
-      throw new Error('UNAUTHORIZED');
+      throw new TRPCError({ code: 'UNAUTHORIZED' });
     }
 
     if (
@@ -20,7 +21,7 @@ function isPartofOrg<
         (membership) => membership.organizationId !== input.organizationId,
       )
     ) {
-      throw new Error('FORBIDDEN');
+      throw new TRPCError({ code: 'FORBIDDEN' });
     }
 
     return params.next({
@@ -32,7 +33,6 @@ function isPartofOrg<
 }
 // Router with some mixed procedures
 export const orgRouter = trpc.router({
-  queries: {},
   mutations: {
     editOrg: procedure
       .concat(

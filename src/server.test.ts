@@ -7,6 +7,7 @@ async function main() {
     // query 'whoami'
     const output = await appRouter.queries.viewerWhoAmi();
     console.log({ output });
+    expectTypeOf(output).not.toBeAny();
     expectTypeOf(output).toBeString();
 
     // should work
