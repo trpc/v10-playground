@@ -32,6 +32,7 @@ function isPartofOrg<
 }
 // Router with some mixed procedures
 export const orgRouter = trpc.router({
+  queries: {},
   mutations: {
     editOrg: procedure
       .concat(
