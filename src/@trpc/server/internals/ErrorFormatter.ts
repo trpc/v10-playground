@@ -20,7 +20,10 @@ export type ErrorFormatter<TContext, TShape extends TRPCErrorShape<number>> = ({
   shape: DefaultErrorShape;
 }) => TShape;
 
-type DefaultErrorData = {
+/**
+ * @internal
+ */
+export type DefaultErrorData = {
   code: TRPC_ERROR_CODE_KEY;
   httpStatus: number;
   path?: string;
@@ -35,3 +38,11 @@ export interface DefaultErrorShape
   message: string;
   code: TRPC_ERROR_CODE_NUMBER;
 }
+
+export const defaultFormatter: ErrorFormatter<any, any> = ({
+  shape,
+}: {
+  shape: DefaultErrorShape;
+}) => {
+  return shape;
+};

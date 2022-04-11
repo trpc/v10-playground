@@ -1,3 +1,4 @@
+import { ErrorFormatter } from './internals/ErrorFormatter';
 import { Procedure } from './procedure';
 
 // FIXME this should properly use TContext
@@ -7,6 +8,7 @@ export interface Router<TContext> {
   queries?: ProcedureRecord<TContext>;
   mutations?: ProcedureRecord<TContext>;
   subscriptions?: ProcedureRecord<TContext>;
+  errorFormatter?: ErrorFormatter<TContext, any>;
 }
 
 type ValidateShape<TActualShape, TExpectedShape> =
@@ -25,6 +27,11 @@ export function createRouterWithContext<TContext>() {
 }
 
 type EnsureRecord<T> = undefined extends T ? {} : T;
+type PickFirstValid<T, K> = undefined extends T
+  ? undefined extends K
+    ? never
+    : K
+  : T;
 
 type mergeRouters<
   TContext,
@@ -35,6 +42,7 @@ type mergeRouters<
   mutations: EnsureRecord<A['mutations']> & EnsureRecord<B['mutations']>;
   subscriptions: EnsureRecord<A['subscriptions']> &
     EnsureRecord<B['subscriptions']>;
+  errorFormatter: PickFirstValid<A['errorFormatter'], B['errorFormatter']>;
 };
 
 type mergeRoutersVariadic<Routers extends Router<any>[]> = Routers extends []
