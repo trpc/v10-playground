@@ -1,47 +1,11 @@
 import { z } from 'zod';
-import { initTRPC } from './@trpc/server';
-
-////////// app bootstrap & middlewares ////////
-type Context = {
-  db?: {};
-  user?: {
-    id: string;
-    memberships: {
-      organizationId: string;
-    }[];
-  };
-};
-const trpc = initTRPC<Context>();
-
-const isAuthed = trpc.middleware((params) => {
-  if (!params.ctx.user) {
-    throw new Error('zup');
-  }
-  return params.next({
-    ctx: {
-      user: params.ctx.user,
-    },
-  });
-});
-
-// mock db
-let postsDb = [
-  {
-    id: '1',
-    title: 'hello tRPC',
-    body: 'this is a preview of v10',
-    userId: 'KATT',
-  },
-];
-
-const procedure = trpc.procedure;
-// const authedProcedure = proc.use(isAuthed);
+import { isAuthed, procedure, trpc } from '../context';
 
 /**
  * A reusable combination of an input + middleware that can be reused.
  * Accepts a Zod-schema as a generic.
  */
-function isPartofOrg<
+export function isPartofOrg<
   TSchema extends z.ZodObject<{ organizationId: z.ZodString }>,
 >(schema: TSchema) {
   return procedure.input(schema).use((params) => {
@@ -66,9 +30,9 @@ function isPartofOrg<
     });
   });
 }
+// Router with some mixed procedures
 
-/////////// app root router //////////
-export const rootRouter = trpc.router({
+export const mixedRouter = trpc.router({
   queries: {
     // procedure with input validation called `greeting`
     greeting: procedure
@@ -150,46 +114,3 @@ export const rootRouter = trpc.router({
       }),
   },
 });
-
-export const postRouter = trpc.router({
-  queries: {
-    // simple procedure without args avialable at postAll`
-    postList: procedure.resolve(() => postsDb),
-    // get post by id or 404 if it's not found
-    postById: procedure
-      .input(
-        z.object({
-          id: z.string(),
-        }),
-      )
-      .resolve(({ input }) => {
-        const post = postsDb.find((post) => post.id === input.id);
-        if (!post) {
-          throw new Error('NOT_FOUND');
-        }
-        return post;
-      }),
-  },
-  mutations: {
-    // mutation with auth + input
-    postAdd: procedure
-      .input(
-        z.object({
-          title: z.string(),
-          body: z.string(),
-        }),
-      )
-      .use(isAuthed)
-      .resolve(({ ctx, input }) => {
-        const post: typeof postsDb[number] = {
-          ...input,
-          id: `${Math.random()}`,
-          userId: ctx.user.id,
-        };
-        postsDb.push(post);
-        return post;
-      }),
-  },
-});
-
-export const appRouter = trpc.mergeRouters(rootRouter, postRouter);
