@@ -78,6 +78,10 @@ export interface ProcedureBuilder<TParams extends Params> {
     _output_out: inferParser<$TParser>['out'];
   }>;
   /**
+   * Add a meta data to the procedure.
+   */
+  meta(meta: TParams['_meta']): ProcedureBuilder<TParams>;
+  /**
    * Add a middleware to the procedure.
    */
   use<$TParams extends Params>(
@@ -91,6 +95,9 @@ export interface ProcedureBuilder<TParams extends Params> {
   ): $ProcedureReturnInput extends ProcedureBuilder<infer $TParams>
     ? CreateProcedureReturnInput<TParams, $TParams>
     : never;
+  /**
+   * Resolve the procedure
+   */
   resolve<$TOutput>(
     resolver: (
       opts: ResolveOptions<TParams>,
