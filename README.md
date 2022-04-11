@@ -1,4 +1,4 @@
-> CodeSandbox link: https://stackblitz.com/github/trpc/v10-playground?file=src%2Fserver.ts
+> CodeSandbox link: https://stackblitz.com/github/trpc/v10-playground?file=src%2Fserver.ts&view=editor
 >
 > Repo: https://github.com/KATT/trpc-procedure-play
 
