@@ -1,4 +1,4 @@
-> CodeSandbox link: https://codesandbox.io/s/github/katt/trpc-procedure-play?file=/src/client.ts
+> CodeSandbox link: https://stackblitz.com/github/trpc/v10-playground?file=src%2Fserver.ts
 >
 > Repo: https://github.com/KATT/trpc-procedure-play
 
@@ -29,10 +29,7 @@ Early draft of how a future [tRPC](https://trpc.io)-version could look like.
 - **Better scaling** than current structure - the TypeScript server starts choking a bit when you get close to 100 procedures in your backend
 
 
-
 ## New router API! 
-
-
 
 ### §1 Basics
 
