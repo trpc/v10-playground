@@ -8,6 +8,7 @@
     "dev:client": "nodemon -e ts -w . -x 'ts-node ./src/client.ts'",
     "dev-run": "run-p dev:* --print-label",
     "dev": "yarn tsc --watch --noEmit",
+    "start": "yarn dev",
     "codegen": "yarn ts-node scripts/generate-big-f-router.ts",
     "postinstall": "yarn codegen"
   },
