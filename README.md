@@ -24,10 +24,9 @@ Early draft of how a future [tRPC](https://trpc.io)-version could look like.
 
 - **More ergonomic API for creating procedures** and building out your backend
 - **CMD+Click** from a your frontend and jump straight into the backend procedure. This will work with `react-query` as well!
-- **Infer expected errors** as well as data - unsure if this is useful yet or if it'll make it, but pretty sure it'll be nice to have.
 - **Enabling having a watchers**-based structure - as you see, that `createRouter()` could easily be automatically generated from a file/folder structure.
 - **Better scaling** than current structure - the TypeScript server starts choking a bit when you get close to 100 procedures in your backend
-
+- ~**Infer expected errors** as well as data - unsure if this is useful yet or if it'll make it, but pretty sure it'll be nice to have.~ Skipped this because of it's complexity - it can still be added later.
 
 ## New router API! 
 
