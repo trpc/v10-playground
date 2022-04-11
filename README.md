@@ -1,4 +1,4 @@
-> CodeSandbox link: https://stackblitz.com/github/trpc/v10-playground?file=src%2Fclient.ts&view=editor
+> CodeSandbox link: https://stackblitz.com/github/trpc/v10-playground?file=src%2Fserver%2Findex.ts,src%2Fclient.ts,src%2Fserver%2Frouters%2FpostRouter.ts&view=editor
 >
 > Repo: https://github.com/KATT/trpc-procedure-play
 
