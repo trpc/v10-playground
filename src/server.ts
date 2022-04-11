@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { initTRPC } from './trpc/server';
+import { initTRPC } from './@trpc/server';
 
 ////////// app bootstrap & middlewares ////////
 type Context = {
@@ -68,24 +68,8 @@ function isPartofOrg<
 }
 
 /////////// app root router //////////
-export const appRouter = trpc.router({
+export const rootRouter = trpc.router({
   queries: {
-    // simple procedure without args avialable at postAll`
-    postList: procedure.resolve(() => postsDb),
-    // get post by id or 404 if it's not found
-    postById: procedure
-      .input(
-        z.object({
-          id: z.string(),
-        }),
-      )
-      .resolve(({ input }) => {
-        const post = postsDb.find((post) => post.id === input.id);
-        if (!post) {
-          throw new Error('NOT_FOUND');
-        }
-        return post;
-      }),
     // procedure with input validation called `greeting`
     greeting: procedure
       .input(
@@ -112,24 +96,6 @@ export const appRouter = trpc.router({
   },
 
   mutations: {
-    // mutation with auth + input
-    postAdd: procedure
-      .input(
-        z.object({
-          title: z.string(),
-          body: z.string(),
-        }),
-      )
-      .use(isAuthed)
-      .resolve(({ ctx, input }) => {
-        const post: typeof postsDb[number] = {
-          ...input,
-          id: `${Math.random()}`,
-          userId: ctx.user.id,
-        };
-        postsDb.push(post);
-        return post;
-      }),
     fireAndForget: procedure.input(z.string()).resolve(() => {
       // no return
     }),
@@ -184,3 +150,46 @@ export const appRouter = trpc.router({
       }),
   },
 });
+
+export const postRouter = trpc.router({
+  queries: {
+    // simple procedure without args avialable at postAll`
+    postList: procedure.resolve(() => postsDb),
+    // get post by id or 404 if it's not found
+    postById: procedure
+      .input(
+        z.object({
+          id: z.string(),
+        }),
+      )
+      .resolve(({ input }) => {
+        const post = postsDb.find((post) => post.id === input.id);
+        if (!post) {
+          throw new Error('NOT_FOUND');
+        }
+        return post;
+      }),
+  },
+  mutations: {
+    // mutation with auth + input
+    postAdd: procedure
+      .input(
+        z.object({
+          title: z.string(),
+          body: z.string(),
+        }),
+      )
+      .use(isAuthed)
+      .resolve(({ ctx, input }) => {
+        const post: typeof postsDb[number] = {
+          ...input,
+          id: `${Math.random()}`,
+          userId: ctx.user.id,
+        };
+        postsDb.push(post);
+        return post;
+      }),
+  },
+});
+
+export const appRouter = trpc.mergeRouters(rootRouter, postRouter);

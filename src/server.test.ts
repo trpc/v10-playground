@@ -39,6 +39,21 @@ async function main() {
 
     expectTypeOf(output).toMatchTypeOf<'ok'>();
   }
+  {
+    const output = await appRouter.mutations.postAdd({
+      input: {
+        title: 'asd',
+        body: 'asd',
+      },
+    });
+
+    expectTypeOf(output).toMatchTypeOf<{
+      id: string;
+      title: string;
+      body: string;
+      userId: string;
+    }>();
+  }
 
   {
     // if you hover result we can see that we can infer both the result and every possible expected error

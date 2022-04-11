@@ -1,5 +1,5 @@
 import type { appRouter } from './server';
-import { createClient } from './trpc/client';
+import { createClient } from './@trpc/client';
 
 const client = createClient<typeof appRouter>();
 
