@@ -1,4 +1,5 @@
-import { MiddlewareFunction, Params } from './middleware';
+import { MiddlewareFunction } from './middleware';
+import { Params } from './Params';
 import { Parser, inferParser } from './parser';
 import {
   DefaultValue as FallbackValue,
@@ -9,9 +10,9 @@ import {
 
 // type ProcedureBuilder
 type MaybePromise<T> = T | Promise<T>;
-interface ResolveOptions<TContext, TInput> {
-  ctx: TContext;
-  input: TInput;
+interface ResolveOptions<TParams extends Params> {
+  ctx: TParams['_ctx_out'];
+  input: TParams['_input_out'];
 }
 export type ProcedureType = 'query' | 'mutation' | 'subscription';
 
@@ -38,7 +39,8 @@ type CreateProcedureReturnInput<
   TPrev extends Params,
   TNext extends Params,
 > = ProcedureBuilder<{
-  ctx: Overwrite<TPrev['ctx'], TNext['ctx']>;
+  _ctx_in: TPrev['_ctx_in'];
+  _ctx_out: Overwrite<TPrev['_ctx_out'], TNext['_ctx_out']>;
   _input_out: FallbackValue<TNext['_input_out'], TPrev['_input_out']>;
   _input_in: FallbackValue<TNext['_input_in'], TPrev['_input_in']>;
   _output_in: FallbackValue<TNext['_output_in'], TPrev['_output_in']>;
@@ -49,7 +51,8 @@ export interface ProcedureBuilder<TParams extends Params> {
   input<$TParser extends Parser>(
     schema: $TParser,
   ): ProcedureBuilder<{
-    ctx: TParams['ctx'];
+    _ctx_in: TParams['_ctx_in'];
+    _ctx_out: TParams['_ctx_out'];
     _output_in: TParams['_output_in'];
     _output_out: TParams['_output_out'];
     _input_in: inferParser<$TParser>['in'];
@@ -58,7 +61,8 @@ export interface ProcedureBuilder<TParams extends Params> {
   output<$TParser extends Parser>(
     schema: $TParser,
   ): ProcedureBuilder<{
-    ctx: TParams['ctx'];
+    _ctx_in: TParams['_ctx_in'];
+    _ctx_out: TParams['_ctx_out'];
     _input_in: TParams['_input_in'];
     _input_out: TParams['_input_out'];
     _output_in: inferParser<$TParser>['in'];
@@ -74,7 +78,7 @@ export interface ProcedureBuilder<TParams extends Params> {
     : never;
   resolve<$TOutput>(
     resolver: (
-      opts: ResolveOptions<TParams['ctx'], TParams['_input_out']>,
+      opts: ResolveOptions<TParams>,
     ) => MaybePromise<FallbackValue<TParams['_output_in'], $TOutput>>,
   ): UnsetMarker extends TParams['_output_out']
     ? Procedure<
@@ -90,7 +94,8 @@ export interface ProcedureBuilder<TParams extends Params> {
 }
 
 export function createBuilder<TContext>(): ProcedureBuilder<{
-  ctx: TContext;
+  _ctx_in: TContext;
+  _ctx_out: TContext;
   _input_out: UnsetMarker;
   _input_in: UnsetMarker;
   _output_in: UnsetMarker;
