@@ -8,7 +8,12 @@ export interface Params<
   TInputOut = unknown,
   TOutputIn = unknown,
   TOutputOut = unknown,
+  TMeta = unknown,
 > {
+  /**
+   * @internal
+   */
+  _meta: TMeta;
   /**
    * @internal
    */

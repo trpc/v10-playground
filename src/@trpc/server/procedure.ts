@@ -39,6 +39,7 @@ type CreateProcedureReturnInput<
   TPrev extends Params,
   TNext extends Params,
 > = ProcedureBuilder<{
+  _meta: TPrev['_meta'];
   _ctx_in: TPrev['_ctx_in'];
   _ctx_out: Overwrite<TPrev['_ctx_out'], TNext['_ctx_out']>;
   _input_out: FallbackValue<TNext['_input_out'], TPrev['_input_out']>;
@@ -54,6 +55,7 @@ export interface ProcedureBuilder<TParams extends Params> {
   input<$TParser extends Parser>(
     schema: $TParser,
   ): ProcedureBuilder<{
+    _meta: TParams['_meta'];
     _ctx_in: TParams['_ctx_in'];
     _ctx_out: TParams['_ctx_out'];
     _output_in: TParams['_output_in'];
@@ -67,6 +69,7 @@ export interface ProcedureBuilder<TParams extends Params> {
   output<$TParser extends Parser>(
     schema: $TParser,
   ): ProcedureBuilder<{
+    _meta: TParams['_meta'];
     _ctx_in: TParams['_ctx_in'];
     _ctx_out: TParams['_ctx_out'];
     _input_in: TParams['_input_in'];
@@ -105,13 +108,14 @@ export interface ProcedureBuilder<TParams extends Params> {
     : Procedure<TParams>;
 }
 
-export function createBuilder<TContext>(): ProcedureBuilder<{
+export function createBuilder<TContext, TMeta>(): ProcedureBuilder<{
   _ctx_in: TContext;
   _ctx_out: TContext;
   _input_out: UnsetMarker;
   _input_in: UnsetMarker;
   _output_in: UnsetMarker;
   _output_out: UnsetMarker;
+  _meta: TMeta;
 }> {
   throw new Error('unimplemented');
 }

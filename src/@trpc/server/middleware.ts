@@ -52,6 +52,7 @@ export type MiddlewareFunction<
   path: string;
   input: TParams['_input_out'];
   rawInput: unknown;
+  meta: TParams['_meta'];
   next: {
     (): Promise<MiddlewareResult<TParams>>;
     <$TContext>(opts: { ctx: $TContext }): Promise<
@@ -62,6 +63,7 @@ export type MiddlewareFunction<
         _input_out: TParams['_input_out'];
         _output_in: TParams['_output_in'];
         _output_out: TParams['_output_out'];
+        _meta: TParams['_meta'];
       }>
     >;
   };
@@ -70,7 +72,7 @@ export type MiddlewareFunction<
 /**
  * @internal
  */
-export function createMiddlewareFactory<TContext>() {
+export function createMiddlewareFactory<TContext, TMeta>() {
   return function createMiddleware<$TNewParams extends Params>(
     fn: MiddlewareFunction<
       {
@@ -80,6 +82,7 @@ export function createMiddlewareFactory<TContext>() {
         _input_in: unknown;
         _output_in: unknown;
         _output_out: unknown;
+        _meta: TMeta;
       },
       $TNewParams
     >,

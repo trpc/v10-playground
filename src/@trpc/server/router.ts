@@ -4,6 +4,9 @@ import { Procedure } from './procedure';
 // FIXME this should properly use TContext
 type ProcedureRecord<_TContext> = Record<string, Procedure<any>>;
 
+/**
+ * @internal
+ */
 export interface Router<TContext> {
   queries?: ProcedureRecord<TContext>;
   mutations?: ProcedureRecord<TContext>;
@@ -11,6 +14,9 @@ export interface Router<TContext> {
   errorFormatter?: ErrorFormatter<TContext, any>;
 }
 
+/**
+ * @internal
+ */
 type ValidateShape<TActualShape, TExpectedShape> =
   TActualShape extends TExpectedShape
     ? Exclude<keyof TActualShape, keyof TExpectedShape> extends never
@@ -18,6 +24,10 @@ type ValidateShape<TActualShape, TExpectedShape> =
       : TExpectedShape
     : never;
 
+/**
+ *
+ * @internal
+ */
 export function createRouterWithContext<TContext>() {
   return function createRouter<TProcedures extends Router<TContext>>(
     procedures: ValidateShape<TProcedures, Router<TContext>>,
