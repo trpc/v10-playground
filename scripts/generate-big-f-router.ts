@@ -34,8 +34,8 @@ for (let routerIndex = 0; routerIndex < NUM_ROUTERS; routerIndex++) {
     routerFile.push(
       '\n' +
         `
-  r${routerIndex}q${procIndex}: trpc.resolver(
-    trpc.zod(
+  r${routerIndex}q${procIndex}: trpc.procedure
+    .input(
       z.object({
         hello: z.string(),
         lengthOf: z
@@ -43,14 +43,13 @@ for (let routerIndex = 0; routerIndex < NUM_ROUTERS; routerIndex++) {
           .transform((s) => s.length)
           .optional()
           .default(''),
-      }),
-    ),
-    (params) => {
+      })
+    )
+    .resolve((params) => {
       return {
         input: params.input,
       }
-    }
-  ),
+    }),
 `.trim(),
     );
   }

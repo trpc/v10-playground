@@ -1,4 +1,4 @@
-import { initTRPC } from '../../src/trpc/server';
+import { initTRPC } from '../../src/@trpc/server';
 
 ////////////////////// app ////////////////////////////
 // context
