@@ -48,6 +48,9 @@ type CreateProcedureReturnInput<
 }>;
 
 export interface ProcedureBuilder<TParams extends Params> {
+  /**
+   * Add an input parser to the procedure.
+   */
   input<$TParser extends Parser>(
     schema: $TParser,
   ): ProcedureBuilder<{
@@ -58,6 +61,9 @@ export interface ProcedureBuilder<TParams extends Params> {
     _input_in: inferParser<$TParser>['in'];
     _input_out: inferParser<$TParser>['out'];
   }>;
+  /**
+   * Add an output parser to the procedure.
+   */
   output<$TParser extends Parser>(
     schema: $TParser,
   ): ProcedureBuilder<{
@@ -68,10 +74,16 @@ export interface ProcedureBuilder<TParams extends Params> {
     _output_in: inferParser<$TParser>['in'];
     _output_out: inferParser<$TParser>['out'];
   }>;
+  /**
+   * Add a middleware to the procedure.
+   */
   use<$TParams extends Params>(
     fn: MiddlewareFunction<TParams, $TParams>,
   ): CreateProcedureReturnInput<TParams, $TParams>;
-  use<$ProcedureReturnInput extends ProcedureBuilder<any>>(
+  /**
+   * Extend the procedure with another procedure
+   */
+  concat<$ProcedureReturnInput extends ProcedureBuilder<any>>(
     proc: $ProcedureReturnInput,
   ): $ProcedureReturnInput extends ProcedureBuilder<infer $TParams>
     ? CreateProcedureReturnInput<TParams, $TParams>

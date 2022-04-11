@@ -134,7 +134,7 @@ export const appRouter = trpc.router({
       // no return
     }),
     editOrg: procedure
-      .use(
+      .concat(
         isPartofOrg(
           z.object({
             organizationId: z.string(),
