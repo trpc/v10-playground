@@ -1,4 +1,4 @@
-import { TRPCError } from '../TRPCError';
+import { TRPCError } from './TRPCError';
 
 export function getMessageFromUnkownError(
   err: unknown,

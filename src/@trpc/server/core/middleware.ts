@@ -1,5 +1,5 @@
-import { Params } from './Params';
-import { ProcedureType } from './procedure';
+import { Params } from './utils';
+import { ProcedureType } from './utils';
 import { MiddlewareMarker } from './utils';
 
 /**

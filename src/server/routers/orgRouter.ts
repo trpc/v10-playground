@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TRPCError } from '../../@trpc/server/TRPCError';
+import { TRPCError } from '../../@trpc/server';
 import { procedure, trpc } from '../context';
 
 /**

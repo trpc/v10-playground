@@ -1,2 +1,3 @@
-export { initTRPC } from './initTRPC';
-export { Router } from './router';
+export { initTRPC } from './core/initTRPC';
+export { Router } from './core/router';
+export { TRPCError } from './error/TRPCError';
