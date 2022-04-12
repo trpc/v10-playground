@@ -1,4 +1,4 @@
-import { ErrorFormatter } from './internals/ErrorFormatter';
+import { ErrorFormatter } from '../errors/formatter';
 import { Procedure } from './procedure';
 
 // FIXME this should properly use TContext

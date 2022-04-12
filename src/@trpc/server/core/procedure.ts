@@ -1,5 +1,5 @@
 import { MiddlewareFunction } from './middleware';
-import { Params } from './Params';
+import { Params } from './utils';
 import { Parser, inferParser } from './parser';
 import {
   DefaultValue as FallbackValue,
@@ -14,7 +14,6 @@ interface ResolveOptions<TParams extends Params> {
   ctx: TParams['_ctx_out'];
   input: TParams['_input_out'];
 }
-export type ProcedureType = 'query' | 'mutation' | 'subscription';
 
 type ClientContext = Record<string, unknown>;
 type ProcedureOptions<TInput extends { input?: unknown }> = {
