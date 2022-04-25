@@ -1,10 +1,10 @@
-> CodeSandbox link: https://stackblitz.com/github/trpc/v10-playground?file=src%2Fserver%2Findex.ts,src%2Fclient.ts,src%2Fserver%2Frouters%2FpostRouter.ts&view=editor
+> **Playground link:** https://stackblitz.com/github/trpc/v10-playground?file=src%2Fserver%2Findex.ts,src%2Fclient.ts,src%2Fserver%2Frouters%2FpostRouter.ts&view=editor
 >
 > Repo: https://github.com/KATT/trpc-procedure-play
 
 # [tRPC](https://trpc.io) V10 play
 
-Early draft of how a future [tRPC](https://trpc.io)-version could look like.
+Draft of how a future [tRPC](https://trpc.io)-version could look like.
 
 ## Play with it!
 
